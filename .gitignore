@@ -26,6 +26,7 @@ ipch/*
 *.a
 *.lib
 
+
 # Executables
 *.exe
 *.out
@@ -66,3 +67,6 @@ Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+#ThirdParty libraries
+!ThirdParty/**/*.lib
