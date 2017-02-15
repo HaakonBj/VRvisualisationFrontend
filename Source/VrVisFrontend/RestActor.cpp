@@ -20,7 +20,8 @@ void ARestActor::BeginPlay()
 void ARestActor::RetrieveDataFromMongoDB() {
 	TSharedRef<IHttpRequest> Request = Http->CreateRequest();
 	Request->OnProcessRequestComplete().BindUObject(this, &ARestActor::OnResponseReceived);
-	Request->SetURL("http://localhost:4000/vrVis");
+	//TODO: Create proper routing in the backend and fix this:
+	Request->SetURL("http://localhost:3000/");
 	Request->SetVerb("GET");
 	Request->SetHeader(TEXT("User-Agent"), "X-UnrealEngine-Agent");
 	Request->SetHeader("Content-Type", TEXT("application/json"));
@@ -33,19 +34,25 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 		TSharedPtr<FJsonValue> JsonParsed;
 		//reader pointer to read the json data from response
 		TSharedRef<TJsonReader<TCHAR>> Reader = TJsonReaderFactory<TCHAR>::Create(Response->GetContentAsString());
+		
+		TArray<FString> ParrentArray;
 		//Deserialize the json data given Reader and the actual object to deserialize
 		if (FJsonSerializer::Deserialize(Reader, JsonParsed)) {
 			TSharedPtr<FJsonObject> ParsedResponseObject = JsonParsed->AsArray()[0]->AsObject();
 			FString id = ParsedResponseObject->GetStringField("_id");
-			FString name = ParsedResponseObject->GetStringField("name");
-			FString note = ParsedResponseObject->GetStringField("note");
-			bool completed = ParsedResponseObject->GetBoolField("completed");
-			FString date = ParsedResponseObject->GetStringField("updated_at");
+			FString sha = ParsedResponseObject->GetStringField("author");
+			FString note = ParsedResponseObject->GetStringField("commitDate");
+			bool retrievedParents = ParsedResponseObject->TryGetStringArrayField("parents", ParrentArray);
+			if (!retrievedParents) {
+				UE_LOG(LogTemp, Error, TEXT("Could not retrieve any parents for commit: %s"), *id);
+			}
+				
 			//TODO: Do stuff with the data
 		} else {
 			UE_LOG(LogTemp, Error, TEXT("Parsing of json data failed"));
 		}
 	} else {
-		UE_LOG(LogTemp, Error, TEXT("The call to the backend failed! Response code is %d"), Response->GetResponseCode());
+		FString responseCode = FString::FromInt(Response->GetResponseCode());
+		UE_LOG(LogTemp, Error, TEXT("The call to the backend failed! Response code is %d"), *responseCode);
 	}
 }
