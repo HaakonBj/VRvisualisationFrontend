@@ -21,7 +21,7 @@ void ARestActor::RetrieveDataFromMongoDB() {
 	TSharedRef<IHttpRequest> Request = Http->CreateRequest();
 	Request->OnProcessRequestComplete().BindUObject(this, &ARestActor::OnResponseReceived);
 	//TODO: Create proper routing in the backend and fix this:
-	Request->SetURL("http://localhost:3000/");
+	Request->SetURL("http://localhost:3000/GitHistory");
 	Request->SetVerb("GET");
 	Request->SetHeader(TEXT("User-Agent"), "X-UnrealEngine-Agent");
 	Request->SetHeader("Content-Type", TEXT("application/json"));
@@ -35,19 +35,18 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 		//reader pointer to read the json data from response
 		TSharedRef<TJsonReader<TCHAR>> Reader = TJsonReaderFactory<TCHAR>::Create(Response->GetContentAsString());
 		
-		TArray<FString> ParrentArray;
+		TArray<TSharedPtr<FJsonValue>> ParrentArray;
+		
 		//Deserialize the json data given Reader and the actual object to deserialize
 		if (FJsonSerializer::Deserialize(Reader, JsonParsed)) {
 			TSharedPtr<FJsonObject> ParsedResponseObject = JsonParsed->AsArray()[0]->AsObject();
 			FString id = ParsedResponseObject->GetStringField("_id");
 			FString sha = ParsedResponseObject->GetStringField("author");
 			FString note = ParsedResponseObject->GetStringField("commitDate");
-			bool retrievedParents = ParsedResponseObject->TryGetStringArrayField("parents", ParrentArray);
-			if (!retrievedParents) {
-				UE_LOG(LogTemp, Error, TEXT("Could not retrieve any parents for commit: %s"), *id);
-			}
-				
-			//TODO: Do stuff with the data
+			
+			ParrentArray = ParsedResponseObject->GetArrayField("parents");
+			//TODO: Loop and save off the data to the memory database.
+			
 		} else {
 			UE_LOG(LogTemp, Error, TEXT("Parsing of json data failed"));
 		}
