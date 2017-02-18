@@ -4,7 +4,9 @@
 
 #include "GameFramework/Actor.h"
 #include "Runtime/Online/HTTP/Public/Http.h"
+#include "SqlConnect.h"
 #include "RestActor.generated.h"
+
 
 UCLASS()
 class VRVISFRONTEND_API ARestActor : public AActor
@@ -13,8 +15,10 @@ class VRVISFRONTEND_API ARestActor : public AActor
 	
 public:	
 	FHttpModule* Http;
+	ASqlConnect* db;
 	ARestActor();
 	virtual void BeginPlay() override;
 	void RetrieveDataFromMongoDB();
 	void OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+	~ARestActor();
 };

@@ -7,6 +7,8 @@
 ARestActor::ARestActor()
 {
 	this->Http = &FHttpModule::Get();
+	this->db = NewObject<ASqlConnect>();
+	//this->dbActor = new ASqlConnect
 }
 
 // Called when the game starts or when spawned
@@ -36,22 +38,39 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 		TSharedRef<TJsonReader<TCHAR>> Reader = TJsonReaderFactory<TCHAR>::Create(Response->GetContentAsString());
 		
 		TArray<TSharedPtr<FJsonValue>> ParrentArray;
-		
 		//Deserialize the json data given Reader and the actual object to deserialize
 		if (FJsonSerializer::Deserialize(Reader, JsonParsed)) {
 			TSharedPtr<FJsonObject> ParsedResponseObject = JsonParsed->AsArray()[0]->AsObject();
 			FString id = ParsedResponseObject->GetStringField("_id");
 			FString sha = ParsedResponseObject->GetStringField("author");
-			FString note = ParsedResponseObject->GetStringField("commitDate");
+			FString date = ParsedResponseObject->GetStringField("commitDate");
 			
 			ParrentArray = ParsedResponseObject->GetArrayField("parents");
-			//TODO: Loop and save off the data to the memory database.
 			
+			
+			
+			
+			
+			//TODO: Loop and save off the data to the memory database.
+			this->db->AddCommit("", "", "", ParrentArray);
 		} else {
 			UE_LOG(LogTemp, Error, TEXT("Parsing of json data failed"));
 		}
 	} else {
-		FString responseCode = FString::FromInt(Response->GetResponseCode());
-		UE_LOG(LogTemp, Error, TEXT("The call to the backend failed! Response code is %d"), *responseCode);
+		if (Response.IsValid())
+		{
+			FString responseCode = FString::FromInt(Response->GetResponseCode());
+			UE_LOG(LogTemp, Error, TEXT("The call to the backend failed! Response code is %d"), *responseCode);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("The call to the backend failed! No response code was received!"));
+		}
 	}
+}
+
+ARestActor::~ARestActor()
+{
+	//UE4 gc's unreferenced objects, handling delete themselves.
+	this->db = nullptr;
 }

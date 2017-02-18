@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "sqlite3.h"
 #include "SqlConnect.generated.h"
 
 UCLASS()
@@ -11,15 +12,13 @@ class VRVISFRONTEND_API ASqlConnect : public AActor
 	GENERATED_BODY()
 	
 public:	
+	sqlite3 * db;
+	
 	// Sets default values for this actor's properties
 	ASqlConnect();
-
+	~ASqlConnect();
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
-	// Called every frame
-	virtual void Tick( float DeltaSeconds ) override;
 
-	
-	
+	void AddCommit(FString id, FString sha, FString date, TArray<TSharedPtr<FJsonValue>> parents);
 };
