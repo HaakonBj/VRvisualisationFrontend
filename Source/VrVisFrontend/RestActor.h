@@ -15,7 +15,7 @@ class VRVISFRONTEND_API ARestActor : public AActor
 	
 public:	
 	FHttpModule* Http;
-	ASqlConnect* db;
+	ASqlConnect* database;
 	ARestActor();
 	virtual void BeginPlay() override;
 	void RetrieveDataFromMongoDB();

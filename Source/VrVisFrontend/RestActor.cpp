@@ -2,13 +2,15 @@
 
 #include "VrVisFrontend.h"
 #include "RestActor.h"
+#include <UnrealMemory.h>
 
 // Sets default values
 ARestActor::ARestActor()
 {
 	this->Http = &FHttpModule::Get();
-	this->db = NewObject<ASqlConnect>();
+	this->database = NewObject<ASqlConnect>();
 	//this->dbActor = new ASqlConnect
+	this->database->AddToRoot();
 }
 
 // Called when the game starts or when spawned
@@ -36,23 +38,21 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 		TSharedPtr<FJsonValue> JsonParsed;
 		//reader pointer to read the json data from response
 		TSharedRef<TJsonReader<TCHAR>> Reader = TJsonReaderFactory<TCHAR>::Create(Response->GetContentAsString());
+		//For saving the 
 		
-		TArray<TSharedPtr<FJsonValue>> ParrentArray;
 		//Deserialize the json data given Reader and the actual object to deserialize
 		if (FJsonSerializer::Deserialize(Reader, JsonParsed)) {
-			TSharedPtr<FJsonObject> ParsedResponseObject = JsonParsed->AsArray()[0]->AsObject();
-			FString id = ParsedResponseObject->GetStringField("_id");
-			FString sha = ParsedResponseObject->GetStringField("author");
-			FString date = ParsedResponseObject->GetStringField("commitDate");
-			
-			ParrentArray = ParsedResponseObject->GetArrayField("parents");
-			
-			
-			
-			
-			
-			//TODO: Loop and save off the data to the memory database.
-			this->db->AddCommit("", "", "", ParrentArray);
+			TArray<TSharedPtr<FJsonValue>> allCommits = JsonParsed->AsArray();
+			for (auto iter: allCommits)
+			{
+				TSharedPtr<FJsonObject> commit = iter->AsObject();
+				FString id = commit->GetStringField("_id");
+				FString sha = commit->GetStringField("author");
+				FString date = commit->GetStringField("commitDate");
+				TArray<TSharedPtr<FJsonValue>> ParrentArray = commit->GetArrayField("parents");
+				this->database->AddCommit(id , sha, date, ParrentArray);
+			}
+
 		} else {
 			UE_LOG(LogTemp, Error, TEXT("Parsing of json data failed"));
 		}
@@ -72,5 +72,5 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 ARestActor::~ARestActor()
 {
 	//UE4 gc's unreferenced objects, handling delete themselves.
-	this->db = nullptr;
+	this->database = nullptr;
 }
