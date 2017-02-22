@@ -2,14 +2,12 @@
 
 #include "VrVisFrontend.h"
 #include "RestActor.h"
-#include <UnrealMemory.h>
 
 // Sets default values
 ARestActor::ARestActor()
 {
 	this->Http = &FHttpModule::Get();
 	this->database = NewObject<ASqlConnect>();
-	//this->dbActor = new ASqlConnect
 	this->database->AddToRoot();
 }
 
@@ -38,7 +36,6 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 		TSharedPtr<FJsonValue> JsonParsed;
 		//reader pointer to read the json data from response
 		TSharedRef<TJsonReader<TCHAR>> Reader = TJsonReaderFactory<TCHAR>::Create(Response->GetContentAsString());
-		//For saving the 
 		
 		//Deserialize the json data given Reader and the actual object to deserialize
 		if (FJsonSerializer::Deserialize(Reader, JsonParsed)) {
@@ -47,10 +44,11 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 			{
 				TSharedPtr<FJsonObject> commit = iter->AsObject();
 				FString id = commit->GetStringField("_id");
-				FString sha = commit->GetStringField("author");
+				FString sha = commit->GetStringField("sha");
+				FString author = commit->GetStringField("author");
 				FString date = commit->GetStringField("commitDate");
 				TArray<TSharedPtr<FJsonValue>> ParrentArray = commit->GetArrayField("parents");
-				this->database->AddCommit(id , sha, date, ParrentArray);
+				this->database->AddCommit(id , sha, author, date, ParrentArray);
 			}
 
 		} else {

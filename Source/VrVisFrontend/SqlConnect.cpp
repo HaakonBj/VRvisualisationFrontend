@@ -11,9 +11,6 @@ ASqlConnect::ASqlConnect()
 	this->InitDB();
 }
 
-
-
-
 ASqlConnect::~ASqlConnect()
 {
 	sqlite3_close(this->db);
@@ -31,8 +28,6 @@ void ASqlConnect::InitDB() {
 		UE_LOG(LogTemp, Log, TEXT("Created database"));
 	}
 	//Create Table in database
-
-
 	this->Query(this->CreateSQLTableStatement().c_str());
 }
 
@@ -44,12 +39,13 @@ void ASqlConnect::BeginPlay()
 
 //TODO: consider adding a parentCount to the backend database
 //TODO: convert the stuff straight to char *
-void ASqlConnect::AddCommit(FString id, FString sha, FString date, TArray<TSharedPtr<FJsonValue>> parents) {
+void ASqlConnect::AddCommit(FString id, FString sha, FString author, FString date, TArray<TSharedPtr<FJsonValue>> parents) {
 	//TODO: this really need to change, incase someone has more than 2 parents...and the table
 	const int maxParents = 2;
 	std::string insertStatement = "INSERT INTO HISTORY VALUES('"
 		+ FStringToString(id) + "','"
 		+ FStringToString(sha) + "','"
+		+ FStringToString(author) + "','"
 		+ FStringToString(date);
 
 	for (int i = 0; i < parents.Num(); i++)
@@ -73,28 +69,50 @@ void ASqlConnect::AddCommit(FString id, FString sha, FString date, TArray<TShare
 	this->Query(insertStatement.c_str());
 }
 
-void ASqlConnect::RetrieveCommitBySha(FString sha) {
+std::vector<std::string> ASqlConnect::RetrieveCommitBySha(FString sha) {
 	std::string retrieveStatement = 
-		"SELECT ID, AUTHOR, COMMITDATE, PARENTONE, PARENTTWO FROM HISTORY WHERE sha = "+ this->FStringToString(sha) + ";";
-	this->Query(retrieveStatement.c_str());
+		"SELECT id, author, commitdate, parentone, parenttwo FROM HISTORY WHERE sha='"+ this->FStringToString(sha) + "';";
+	return this->SendQueryForSingleCommit(retrieveStatement);
 }
 
+std::vector<std::string> ASqlConnect::RetrieveCommitById(FString id) {
+	std::string retrieveStatement =
+		"SELECT id, author, commitdate, parentone, parenttwo FROM HISTORY WHERE id='" + this->FStringToString(id) + "';";
+	return this->SendQueryForSingleCommit(retrieveStatement);
+}
+
+std::vector<std::vector<std::string>> ASqlConnect::RetrieveCommitsByAuthor(FString author) {
+	std::string retrieveStatement =
+		"SELECT id, author, commitdate, parentone, parenttwo FROM HISTORY WHERE author='" + this->FStringToString(author) + "';";
+	return this->Query(retrieveStatement.c_str());
+}
+
+std::vector<std::string> ASqlConnect::SendQueryForSingleCommit(std::string statement) {
+	std::vector<std::vector<std::string>> answer = this->Query(statement.c_str());
+	return answer.front();
+}
+
+std::vector<std::vector<std::string>> ASqlConnect::RetrieveWholeHistory() {
+	std::string retrieveStatement =
+		"SELECT * FROM HISTORY;";
+	return this->Query(retrieveStatement.c_str());
+}
 
 //TODO handle more than 2 parents:
 std::string ASqlConnect::CreateSQLTableStatement() {
 	std::string sqlCreateTable = "CREATE TABLE HISTORY(" \
-		"ID INT PRIMARY KEY		NOT NULL,"	\
-		"AUTHOR			TEXT	NOT NULL,"	\
-		"COMMITDATE		TEXT	NOT NULL,"	\
-		"PARENTONE		TEXT			,"	\
-		"PARENTTWO		TEXT	);";
+		"id INT PRIMARY KEY		NOT NULL,"	\
+		"sha			TEXT	NOT NULL,"	\
+		"author			TEXT	NOT NULL,"	\
+		"commitdate		TEXT	NOT NULL,"	\
+		"parentone		TEXT			,"	\
+		"parenttwo		TEXT	);";
 
 	return sqlCreateTable;
 }
 
-
 //http://www.dreamincode.net/forums/topic/122300-sqlite-in-c/
-
+//Query the database:
 std::vector<std::vector<std::string>> ASqlConnect::Query(const char * query)
 {
 	sqlite3_stmt *statement;
@@ -104,18 +122,14 @@ std::vector<std::vector<std::string>> ASqlConnect::Query(const char * query)
 		int cols = sqlite3_column_count(statement);
 		int result = 0;
 //TODO: check if you can use result as condition in while
-		while (true)
-		{
+		while (true) {
 			result = sqlite3_step(statement);
-			if (result == SQLITE_ROW)
-			{
+			if (result == SQLITE_ROW ) {
 				std::vector<std::string> values;
-				for (int col = 0; col < cols; col++)
-				{
+				for (int col = 0; col < cols; col++) {
 					std::string val;
 					char* ptr = (char*)sqlite3_column_text(statement, col);
-					if (ptr)
-					{
+					if (ptr) {
 						val = ptr;
 					} else {
 						val = "";
@@ -123,9 +137,7 @@ std::vector<std::vector<std::string>> ASqlConnect::Query(const char * query)
 					values.push_back(val);
 				}
 				results.push_back(values);
-			}
-			else
-			{
+			} else {
 				break;
 			}
 		}
@@ -134,7 +146,7 @@ std::vector<std::vector<std::string>> ASqlConnect::Query(const char * query)
 	std::string error = sqlite3_errmsg(this->db);
 	if (error != "not an error") { 
 		FString errorString = StringToFString(error);
-		UE_LOG(LogTemp, Error, TEXT("Failed creating database %s \n"), *errorString);
+		UE_LOG(LogTemp, Error, TEXT("Failed creating/populating the db %s \n"), *errorString);
 	}
 	return results;
 }
