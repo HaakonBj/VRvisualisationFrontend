@@ -43,33 +43,33 @@ void ASqlConnect::BeginPlay()
 }
 
 //TODO: consider adding a parentCount to the backend database
-//TODO: conver the stuff straight to char *
+//TODO: convert the stuff straight to char *
 void ASqlConnect::AddCommit(FString id, FString sha, FString date, TArray<TSharedPtr<FJsonValue>> parents) {
-	FString parentOne = "";
-	FString parentTwo = "";
-	std::string insertStatement = "";
-	auto parentObjectOne = parents[0]->AsObject();
-	auto parentObjectTwo = parents[1]->AsObject();
-	if (parentObjectTwo.IsValid())
+	//TODO: this really need to change, incase someone has more than 2 parents...and the table
+	const int maxParents = 2;
+	std::string insertStatement = "INSERT INTO HISTORY VALUES('"
+		+ FStringToString(id) + "','"
+		+ FStringToString(sha) + "','"
+		+ FStringToString(date);
+
+	for (int i = 0; i < parents.Num(); i++)
 	{
-		parentTwo = parentObjectTwo->GetStringField("sha");
+		auto parent = parents[i]->AsObject();
+		FString temp = parent->GetStringField("sha");
+		std::string parentSha = FStringToString(temp);
+		insertStatement += "','";
+		insertStatement.append(parentSha);
 	}
-	parentOne = parentObjectOne->GetStringField("sha");
-	//TODO: check if this can be made smarter:
-	if (parentTwo != ""){
-		insertStatement = "INSERT INTO HISTORY VALUES("
-			+ FStringToString(id) + ", "
-			+ FStringToString(sha) + ", "
-			+ FStringToString(date) + ", "
-			+ FStringToString(parentOne) + ", "
-			+ FStringToString(parentTwo) + ");";
-	} else {
-		insertStatement = "INSERT INTO HISTORY VALUES("
-			+ FStringToString(id) + ", "
-			+ FStringToString(sha) + ", "
-			+ FStringToString(date) + ", "
-			+ FStringToString(parentOne) + ");";
+
+	if (parents.Num() < maxParents)
+	{
+		for (int i = maxParents - parents.Num(); i > 0; i--)
+		{
+			insertStatement += "','NULL";
+		}
 	}
+	insertStatement.append("');");
+
 	this->Query(insertStatement.c_str());
 }
 
