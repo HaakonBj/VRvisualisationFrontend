@@ -20,14 +20,15 @@ public:
 	virtual void BeginPlay() override;
 	void InitDB();
 	void AddCommit(FString id, FString sha, FString author, FString date, TArray<TSharedPtr<FJsonValue>> parents);
-	std::vector<std::string> RetrieveCommitBySha(FString sha);
-	std::vector<std::string> RetrieveCommitById(FString id);
-	std::vector<std::vector<std::string>> RetrieveCommitsByAuthor(FString author);
-	std::vector<std::string> SendQueryForSingleCommit(std::string statement);
+	TArray<FString> RetrieveCommitBySha(FString sha);
+	TArray<FString> RetrieveCommitById(FString id);
+	TArray<TArray<FString>> RetrieveCommitsByAuthor(FString author);
+	TArray<TArray<FString>> Query(const char* query);
+	TArray<FString> SendQueryForSingleCommit(std::string statement);
 	//Carefull with this one, you will have two git repo in the memory at the same time:
-	std::vector<std::vector<std::string>> RetrieveWholeHistory();
+	TArray<TArray<FString>> RetrieveWholeHistory();
 	std::string CreateSQLTableStatement();
-	std::vector<std::vector<std::string>> Query(const char* query);
 	std::string FStringToString(FString in);
 	FString StringToFString(std::string in);
+	FString CharArrayToFString(char * in);
 };

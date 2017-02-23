@@ -4,18 +4,21 @@
 #include "RestActor.h"
 
 // Sets default values
-ARestActor::ARestActor()
-{
+ARestActor::ARestActor() {
 	this->Http = &FHttpModule::Get();
 	this->database = NewObject<ASqlConnect>();
 	this->database->AddToRoot();
 }
 
 // Called when the game starts or when spawned
-void ARestActor::BeginPlay()
-{
+void ARestActor::BeginPlay() {
 	RetrieveDataFromMongoDB();
 	Super::BeginPlay();
+}
+
+ARestActor::~ARestActor() {
+	//UE4 gc's unreferenced objects, handling delete themselves.
+	this->database = nullptr;
 }
 
 //Http call
@@ -40,8 +43,7 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 		//Deserialize the json data given Reader and the actual object to deserialize
 		if (FJsonSerializer::Deserialize(Reader, JsonParsed)) {
 			TArray<TSharedPtr<FJsonValue>> allCommits = JsonParsed->AsArray();
-			for (auto iter: allCommits)
-			{
+			for (auto iter: allCommits) {
 				TSharedPtr<FJsonObject> commit = iter->AsObject();
 				FString id = commit->GetStringField("_id");
 				FString sha = commit->GetStringField("sha");
@@ -50,25 +52,15 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 				TArray<TSharedPtr<FJsonValue>> ParrentArray = commit->GetArrayField("parents");
 				this->database->AddCommit(id , sha, author, date, ParrentArray);
 			}
-
 		} else {
 			UE_LOG(LogTemp, Error, TEXT("Parsing of json data failed"));
 		}
 	} else {
-		if (Response.IsValid())
-		{
+		if (Response.IsValid()) {
 			FString responseCode = FString::FromInt(Response->GetResponseCode());
 			UE_LOG(LogTemp, Error, TEXT("The call to the backend failed! Response code is %d"), *responseCode);
-		}
-		else
-		{
+		} else {
 			UE_LOG(LogTemp, Error, TEXT("The call to the backend failed! No response code was received!"));
 		}
 	}
-}
-
-ARestActor::~ARestActor()
-{
-	//UE4 gc's unreferenced objects, handling delete themselves.
-	this->database = nullptr;
 }
