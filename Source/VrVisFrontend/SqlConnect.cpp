@@ -71,22 +71,22 @@ TArray<FString> ASqlConnect::RetrieveCommitBySha(FString sha) {
 
 TArray<FString> ASqlConnect::RetrieveCommitById(FString id) {
 	std::string retrieveStatement =
-		"SELECT id, author, commitdate, parentone, parenttwo FROM HISTORY WHERE id='" + this->FStringToString(id) + "';";
+		"SELECT sha, author, commitdate, parentone, parenttwo FROM HISTORY WHERE id='" + this->FStringToString(id) + "';";
 	return this->SendQueryForSingleCommit(retrieveStatement);
 }
 
-TArray<TArray<FString>> ASqlConnect::RetrieveCommitsByAuthor(FString author) {
+TArray<FArr> ASqlConnect::RetrieveCommitsByAuthor(FString author) {
 	std::string retrieveStatement =
-		"SELECT id, author, commitdate, parentone, parenttwo FROM HISTORY WHERE author='" + this->FStringToString(author) + "';";
+		"SELECT id, sha, commitdate, parentone, parenttwo FROM HISTORY WHERE author='" + this->FStringToString(author) + "';";
 	return this->Query(retrieveStatement.c_str());
 }
 
 TArray<FString> ASqlConnect::SendQueryForSingleCommit(std::string statement) {
-	TArray<TArray<FString>> answer = this->Query(statement.c_str());
-	return answer.Last();
+	TArray<FArr> answer = this->Query(statement.c_str());
+	return answer.Last().arr;
 }
 
-TArray<TArray<FString>> ASqlConnect::RetrieveWholeHistory() {
+TArray<FArr> ASqlConnect::RetrieveWholeHistory() {
 	std::string retrieveStatement =
 		"SELECT * FROM HISTORY;";
 	return this->Query(retrieveStatement.c_str());
@@ -107,9 +107,9 @@ std::string ASqlConnect::CreateSQLTableStatement() {
 
 //http://www.dreamincode.net/forums/topic/122300-sqlite-in-c/
 //Query the database:
-TArray<TArray<FString>> ASqlConnect::Query(const char * query) {
+TArray<FArr> ASqlConnect::Query(const char * query) {
 	sqlite3_stmt *statement;
-	TArray<TArray<FString>> results;
+	TArray<FArr> results;
 
 	if (sqlite3_prepare_v2(this->db, query, -1, &statement, 0) == SQLITE_OK) {
 		int cols = sqlite3_column_count(statement);
@@ -118,7 +118,7 @@ TArray<TArray<FString>> ASqlConnect::Query(const char * query) {
 		while (true) {
 			result = sqlite3_step(statement);
 			if (result == SQLITE_ROW) {
-				TArray<FString> values;
+				FArr values;
 				for (int col = 0; col < cols; col++) {
 					FString val;
 					char* ptr = (char*)sqlite3_column_text(statement, col);
@@ -128,7 +128,7 @@ TArray<TArray<FString>> ASqlConnect::Query(const char * query) {
 					else {
 						val = "";
 					}
-					values.Add(val);
+					values.arr.Add(val);
 				}
 				results.Add(values);
 			}

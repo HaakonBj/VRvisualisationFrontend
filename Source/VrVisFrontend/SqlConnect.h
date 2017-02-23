@@ -6,6 +6,7 @@
 #include "sqlite3.h"
 #include <string>
 #include <vector>
+#include "FArr.h"
 #include "SqlConnect.generated.h"
 
 UCLASS()
@@ -22,11 +23,11 @@ public:
 	void AddCommit(FString id, FString sha, FString author, FString date, TArray<TSharedPtr<FJsonValue>> parents);
 	TArray<FString> RetrieveCommitBySha(FString sha);
 	TArray<FString> RetrieveCommitById(FString id);
-	TArray<TArray<FString>> RetrieveCommitsByAuthor(FString author);
-	TArray<TArray<FString>> Query(const char* query);
+	TArray<FArr> RetrieveCommitsByAuthor(FString author);
+	TArray<FArr> Query(const char* query);
 	TArray<FString> SendQueryForSingleCommit(std::string statement);
 	//Carefull with this one, you will have two git repo in the memory at the same time:
-	TArray<TArray<FString>> RetrieveWholeHistory();
+	TArray<FArr> RetrieveWholeHistory();
 	std::string CreateSQLTableStatement();
 	std::string FStringToString(FString in);
 	FString StringToFString(std::string in);

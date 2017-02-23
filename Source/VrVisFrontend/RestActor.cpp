@@ -55,6 +55,7 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 		} else {
 			UE_LOG(LogTemp, Error, TEXT("Parsing of json data failed"));
 		}
+		auto test = this->database->RetrieveCommitById("1");
 	} else {
 		if (Response.IsValid()) {
 			FString responseCode = FString::FromInt(Response->GetResponseCode());
