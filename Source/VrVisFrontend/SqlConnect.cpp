@@ -7,6 +7,7 @@
 // Sets default values
 ASqlConnect::ASqlConnect() {
 	this->db = nullptr;
+	this->dbIsReady = false;
 	this->InitDB();
 }
 
@@ -27,6 +28,11 @@ void ASqlConnect::InitDB() {
 	}
 	//Create Table in database
 	this->Query(this->CreateSQLTableStatement().c_str());
+}
+
+bool ASqlConnect::DatabaseIsReady()
+{
+	return this->dbIsReady;
 }
 
 // Called when the game starts or when spawned
@@ -65,19 +71,19 @@ void ASqlConnect::AddCommit(FString id, FString sha, FString author, FString dat
 
 TArray<FString> ASqlConnect::RetrieveCommitBySha(FString sha) {
 	std::string retrieveStatement = 
-		"SELECT id, author, commitdate, parentone, parenttwo FROM HISTORY WHERE sha='"+ this->FStringToString(sha) + "';";
+		"SELECT id, sha, author, commitdate, parentone, parenttwo FROM HISTORY WHERE sha='"+ this->FStringToString(sha) + "';";
 	return this->SendQueryForSingleCommit(retrieveStatement);
 }
 
 TArray<FString> ASqlConnect::RetrieveCommitById(FString id) {
 	std::string retrieveStatement =
-		"SELECT sha, author, commitdate, parentone, parenttwo FROM HISTORY WHERE id='" + this->FStringToString(id) + "';";
+		"SELECT id, sha, author, commitdate, parentone, parenttwo FROM HISTORY WHERE id='" + this->FStringToString(id) + "';";
 	return this->SendQueryForSingleCommit(retrieveStatement);
 }
 
 TArray<FArr> ASqlConnect::RetrieveCommitsByAuthor(FString author) {
 	std::string retrieveStatement =
-		"SELECT id, sha, commitdate, parentone, parenttwo FROM HISTORY WHERE author='" + this->FStringToString(author) + "';";
+		"SELECT id, sha, author, commitdate, parentone, parenttwo FROM HISTORY WHERE author='" + this->FStringToString(author) + "';";
 	return this->Query(retrieveStatement.c_str());
 }
 

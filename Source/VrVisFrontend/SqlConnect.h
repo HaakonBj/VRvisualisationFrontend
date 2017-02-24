@@ -18,6 +18,9 @@ public:
 	sqlite3 * db;
 	ASqlConnect();
 	~ASqlConnect();
+	bool dbIsReady;
+	UFUNCTION(BlueprintPure, Category = "SqlConnect")
+	bool DatabaseIsReady();
 	virtual void BeginPlay() override;
 	void InitDB();
 	void AddCommit(FString id, FString sha, FString author, FString date, TArray<TSharedPtr<FJsonValue>> parents);
@@ -27,6 +30,7 @@ public:
 	TArray<FArr> Query(const char* query);
 	TArray<FString> SendQueryForSingleCommit(std::string statement);
 	//Carefull with this one, you will have two git repo in the memory at the same time:
+	UFUNCTION(BlueprintCallable, Category = "SqlConnect")
 	TArray<FArr> RetrieveWholeHistory();
 	std::string CreateSQLTableStatement();
 	std::string FStringToString(FString in);

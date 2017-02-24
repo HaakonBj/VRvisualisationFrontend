@@ -2,12 +2,27 @@
 
 #include "VrVisFrontend.h"
 #include "RestActor.h"
+#include "CommitActor.h"
 
 // Sets default values
 ARestActor::ARestActor() {
 	this->Http = &FHttpModule::Get();
 	this->database = NewObject<ASqlConnect>();
 	this->database->AddToRoot();
+	this->DisableComponentsSimulatePhysics(); //possibly use actor->GetRootComponent()->SetSimulatePhysics( false ); in component
+	this->rootSphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
+	this->RootComponent = this->rootSphereComponent;
+	this->rootSphereComponent->InitSphereRadius(40.0f);
+	this->sphereVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualRepresentation"));
+	this->sphereVisual->SetupAttachment(rootSphereComponent);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereVisualAsset(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
+	if (SphereVisualAsset.Succeeded()) {
+		sphereVisual->SetStaticMesh(SphereVisualAsset.Object);
+		sphereVisual->SetRelativeLocation(FVector(0.0f, 0.0f, -40.0f));
+		sphereVisual->SetWorldScale3D(FVector(0.8f));
+	} else {
+		UE_LOG(LogTemp, Error, TEXT("Failed loading Mesh for Rest Actor root mesh component!"));
+	}
 }
 
 // Called when the game starts or when spawned
@@ -55,7 +70,7 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 		} else {
 			UE_LOG(LogTemp, Error, TEXT("Parsing of json data failed"));
 		}
-		auto test = this->database->RetrieveCommitById("1");
+		this->database->dbIsReady = true;
 	} else {
 		if (Response.IsValid()) {
 			FString responseCode = FString::FromInt(Response->GetResponseCode());
@@ -65,3 +80,16 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 		}
 	}
 }
+
+TArray<FArr> ARestActor::RetrieveWholeHistory() {
+	return this->database->RetrieveWholeHistory();
+}
+
+//void ARestActor::CreateTree(TArray<FArr> history)
+//{
+//	for (auto iter : history) {
+//		auto what = this->CreateDefaultSubobject<UCommitComponent>();
+//		//auto something = this->CreateDefaultSubobject<UCommitComponent>(TEXT("Test"));
+//		
+//	}
+//}

@@ -62,6 +62,14 @@ Saved/Config/*
 Saved/Config/Windows/*
 !Saved/Config/Windows/Engine.ini
 
+Content/*
+!Content/StarterContent
+Content/StarterContent/*
+!Content/StarterContent/Shapes
+Content/StarterContent/Shapes/*
+!Content/StarterContent/Shapes/Shape_Sphere.uasset
+
+
 # Compiled source files for the engine to use
 Intermediate/*
 

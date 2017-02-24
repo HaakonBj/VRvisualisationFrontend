@@ -14,11 +14,21 @@ class VRVISFRONTEND_API ARestActor : public AActor
 	GENERATED_BODY()
 	
 public:	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
+	USphereComponent* rootSphereComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
+	UStaticMeshComponent* sphereVisual;
 	FHttpModule* Http;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category ="Rest")
 	ASqlConnect* database;
 	ARestActor();
 	virtual void BeginPlay() override;
 	void RetrieveDataFromMongoDB();
 	void OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+	UFUNCTION(BlueprintCallable, Category = "Rest")
+	TArray<FArr> RetrieveWholeHistory();
+	//UFUNCTION(BlueprintCallable, Category = "Rest")
+	//void CreateTree(TArray<FArr> history);
+	//TODO: might want to just create the tree from RetrieveWholeHistory, just to avoid passing it all the time
 	~ARestActor();
 };
