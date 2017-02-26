@@ -8,6 +8,7 @@
 ASqlConnect::ASqlConnect() {
 	this->db = nullptr;
 	this->dbIsReady = false;
+	this->dbGotData = false;
 	this->InitDB();
 }
 
@@ -28,11 +29,16 @@ void ASqlConnect::InitDB() {
 	}
 	//Create Table in database
 	this->Query(this->CreateSQLTableStatement().c_str());
+	this->dbIsReady = true;
 }
 
 bool ASqlConnect::DatabaseIsReady()
 {
 	return this->dbIsReady;
+}
+
+bool ASqlConnect::DatabaseGotData() {
+	return this->dbGotData;
 }
 
 // Called when the game starts or when spawned

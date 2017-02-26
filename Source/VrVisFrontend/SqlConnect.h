@@ -19,8 +19,11 @@ public:
 	ASqlConnect();
 	~ASqlConnect();
 	bool dbIsReady;
+	bool dbGotData;
 	UFUNCTION(BlueprintPure, Category = "SqlConnect")
 	bool DatabaseIsReady();
+	UFUNCTION(BlueprintPure, Category = "SqlConnect")
+	bool DatabaseGotData();
 	virtual void BeginPlay() override;
 	void InitDB();
 	void AddCommit(FString id, FString sha, FString author, FString date, TArray<TSharedPtr<FJsonValue>> parents);

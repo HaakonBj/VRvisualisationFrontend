@@ -6,10 +6,7 @@
 
 // Sets default values
 ARestActor::ARestActor() {
-	this->Http = &FHttpModule::Get();
-	this->database = NewObject<ASqlConnect>();
-	this->database->AddToRoot();
-	this->DisableComponentsSimulatePhysics(); //possibly use actor->GetRootComponent()->SetSimulatePhysics( false ); in component
+	
 	this->rootSphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
 	this->RootComponent = this->rootSphereComponent;
 	this->rootSphereComponent->InitSphereRadius(40.0f);
@@ -23,11 +20,21 @@ ARestActor::ARestActor() {
 	} else {
 		UE_LOG(LogTemp, Error, TEXT("Failed loading Mesh for Rest Actor root mesh component!"));
 	}
+	this->DisableComponentsSimulatePhysics(); //possibly use actor->GetRootComponent()->SetSimulatePhysics( false ); in component
 }
+
+void ARestActor::InitRestActor() {
+	this->Http = &FHttpModule::Get();
+	this->database = NewObject<ASqlConnect>();
+	this->database->AddToRoot();
+}
+
+
 
 // Called when the game starts or when spawned
 void ARestActor::BeginPlay() {
-	RetrieveDataFromMongoDB();
+//	RetrieveDataFromMongoDB();
+
 	Super::BeginPlay();
 }
 
@@ -40,7 +47,6 @@ ARestActor::~ARestActor() {
 void ARestActor::RetrieveDataFromMongoDB() {
 	TSharedRef<IHttpRequest> Request = Http->CreateRequest();
 	Request->OnProcessRequestComplete().BindUObject(this, &ARestActor::OnResponseReceived);
-	//TODO: Create proper routing in the backend and fix this:
 	Request->SetURL("http://localhost:3000/GitHistory");
 	Request->SetVerb("GET");
 	Request->SetHeader(TEXT("User-Agent"), "X-UnrealEngine-Agent");
@@ -70,7 +76,7 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 		} else {
 			UE_LOG(LogTemp, Error, TEXT("Parsing of json data failed"));
 		}
-		this->database->dbIsReady = true;
+		this->database->dbGotData = true;
 	} else {
 		if (Response.IsValid()) {
 			FString responseCode = FString::FromInt(Response->GetResponseCode());

@@ -10,13 +10,13 @@ ACommitActor::ACommitActor()
 	this->DisableComponentsSimulatePhysics(); //possibly use actor->GetRootComponent()->SetSimulatePhysics( false ); in component
 	this->rootSphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
 	this->RootComponent = this->rootSphereComponent;
-	this->rootSphereComponent->InitSphereRadius(40.0f);
+	this->rootSphereComponent->InitSphereRadius(5.0f);
 	this->sphereVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualRepresentation"));
 	this->sphereVisual->SetupAttachment(rootSphereComponent);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereVisualAsset(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
 	if (SphereVisualAsset.Succeeded()) {
 		sphereVisual->SetStaticMesh(SphereVisualAsset.Object);
-		sphereVisual->SetRelativeLocation(FVector(0.0f, 0.0f, -40.0f));
+		sphereVisual->SetRelativeLocation(FVector(0.0f, 0.0f, -5.0f));
 		sphereVisual->SetWorldScale3D(FVector(0.8f));
 	}
 	else {
@@ -24,7 +24,7 @@ ACommitActor::ACommitActor()
 	}
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	//PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = true;
 	// ...
 }
 
@@ -37,7 +37,6 @@ void ACommitActor::Init(FArr data) {
 	this->parentOne = data.arr[4];
 	this->parentTwo = data.arr[5];
 	PrimaryActorTick.bCanEverTick = true;
-	//TODO add components, recompile, then try running bp again
 }
 
 // Called when the game starts

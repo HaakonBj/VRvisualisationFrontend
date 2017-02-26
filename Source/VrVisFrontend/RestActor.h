@@ -23,10 +23,14 @@ public:
 	ASqlConnect* database;
 	ARestActor();
 	virtual void BeginPlay() override;
+	UFUNCTION(BlueprintCallable, Category = "Rest")
 	void RetrieveDataFromMongoDB();
 	void OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	TArray<FArr> RetrieveWholeHistory();
+	UFUNCTION(BlueprintCallable, Category = "Rest")
+	void InitRestActor();
+
 	//UFUNCTION(BlueprintCallable, Category = "Rest")
 	//void CreateTree(TArray<FArr> history);
 	//TODO: might want to just create the tree from RetrieveWholeHistory, just to avoid passing it all the time
