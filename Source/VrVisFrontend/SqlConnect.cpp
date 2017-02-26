@@ -3,7 +3,6 @@
 #include "VrVisFrontend.h"
 #include "SqlConnect.h"
 
-
 // Sets default values
 ASqlConnect::ASqlConnect() {
 	this->db = nullptr;
@@ -23,8 +22,7 @@ void ASqlConnect::InitDB() {
 	response = sqlite3_open(":memory:", &this->db);
 	if (response) {
 		UE_LOG(LogTemp, Error, TEXT("Failed creating database %s \n"), sqlite3_errmsg(db));
-	}
-	else {
+	} else {
 		UE_LOG(LogTemp, Log, TEXT("Created database"));
 	}
 	//Create Table in database
@@ -32,8 +30,7 @@ void ASqlConnect::InitDB() {
 	this->dbIsReady = true;
 }
 
-bool ASqlConnect::DatabaseIsReady()
-{
+bool ASqlConnect::DatabaseIsReady() {
 	return this->dbIsReady;
 }
 
@@ -136,8 +133,7 @@ TArray<FArr> ASqlConnect::Query(const char * query) {
 					char* ptr = (char*)sqlite3_column_text(statement, col);
 					if (ptr) {
 						val = this->CharArrayToFString(ptr);
-					}
-					else {
+					} else {
 						val = "";
 					}
 					values.arr.Add(val);

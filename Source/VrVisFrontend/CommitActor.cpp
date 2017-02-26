@@ -5,8 +5,7 @@
 
 
 //Sets default values for this component's properties
-ACommitActor::ACommitActor()
-{
+ACommitActor::ACommitActor() {
 	this->DisableComponentsSimulatePhysics(); //possibly use actor->GetRootComponent()->SetSimulatePhysics( false ); in component
 	this->rootSphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
 	this->RootComponent = this->rootSphereComponent;
@@ -16,16 +15,13 @@ ACommitActor::ACommitActor()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereVisualAsset(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
 	if (SphereVisualAsset.Succeeded()) {
 		sphereVisual->SetStaticMesh(SphereVisualAsset.Object);
-		sphereVisual->SetRelativeLocation(FVector(0.0f, 0.0f, -5.0f));
+		sphereVisual->SetRelativeLocation(FVector(0.0f, 0.0f, -10.0f));
 		sphereVisual->SetWorldScale3D(FVector(0.8f));
 	}
 	else {
 		UE_LOG(LogTemp, Error, TEXT("Failed loading Mesh for Rest Actor root mesh component!"));
 	}
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryActorTick.bCanEverTick = true;
-	// ...
 }
 
 //TODO: check if have to turn on ticks for parent actor e.g. RestActor
@@ -40,85 +36,59 @@ void ACommitActor::Init(FArr data) {
 }
 
 // Called when the game starts
-void ACommitActor::BeginPlay()
-{
+void ACommitActor::BeginPlay() {
 	Super::BeginPlay();
-
-	// ...
-	
 }
-
 
 // Called every frame
-void ACommitActor::Tick( float DeltaSeconds)
-{
+void ACommitActor::Tick( float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
-
-	// ...
 }
 
-//void UCommitComponent::SetPosition(FVector newPosition)
-//{
-//	this->SetWorldLocation(newPosition);
-//}
-
-int ACommitActor::GetId()
-{
+int ACommitActor::GetId() {
 	return this->id;
 }
 
-void ACommitActor::SetId(int newId)
-{
+void ACommitActor::SetId(int newId) {
 	this->id = newId;
 }
 
-FString ACommitActor::GetAuthor()
-{
+FString ACommitActor::GetAuthor() {
 	return this->author;
 }
 
-void ACommitActor::SetAuthor(FString newAuthor)
-{
+void ACommitActor::SetAuthor(FString newAuthor) {
 	this->author = newAuthor;
 }
 
-FString ACommitActor::GetSha()
-{
+FString ACommitActor::GetSha() {
 	return this->sha;
 }
 
-void ACommitActor::SetSha(FString newSha)
-{
+void ACommitActor::SetSha(FString newSha) {
 	this->sha = newSha;
 }
 
-FString ACommitActor::GetParentOne()
-{
+FString ACommitActor::GetParentOne() {
 	return this->parentOne;
 }
 
-void ACommitActor::SetParentOne(FString newParentOneSha)
-{
+void ACommitActor::SetParentOne(FString newParentOneSha) {
 	this->parentOne = newParentOneSha;
 }
 
-FString ACommitActor::GetParentTwo()
-{
+FString ACommitActor::GetParentTwo() {
 	return this->parentTwo;
 }
 
-void ACommitActor::SetParentTwo(FString newParentTwoSha)
-{
+void ACommitActor::SetParentTwo(FString newParentTwoSha) {
 	this->parentTwo = newParentTwoSha;
 }
 
-FString ACommitActor::GetDate()
-{
+FString ACommitActor::GetDate() {
 	return this->date;
 }
 
-void ACommitActor::SetDate(FString newDate)
-{
+void ACommitActor::SetDate(FString newDate) {
 	this->date = newDate;
 }
-

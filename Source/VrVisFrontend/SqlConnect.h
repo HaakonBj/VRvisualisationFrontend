@@ -13,7 +13,6 @@ UCLASS()
 class VRVISFRONTEND_API ASqlConnect : public AActor
 {
 	GENERATED_BODY()
-	
 public:
 	sqlite3 * db;
 	ASqlConnect();

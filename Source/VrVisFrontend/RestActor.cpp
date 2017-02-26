@@ -6,7 +6,6 @@
 
 // Sets default values
 ARestActor::ARestActor() {
-	
 	this->rootSphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
 	this->RootComponent = this->rootSphereComponent;
 	this->rootSphereComponent->InitSphereRadius(40.0f);
@@ -29,12 +28,8 @@ void ARestActor::InitRestActor() {
 	this->database->AddToRoot();
 }
 
-
-
 // Called when the game starts or when spawned
 void ARestActor::BeginPlay() {
-//	RetrieveDataFromMongoDB();
-
 	Super::BeginPlay();
 }
 
@@ -60,7 +55,6 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 		TSharedPtr<FJsonValue> JsonParsed;
 		//reader pointer to read the json data from response
 		TSharedRef<TJsonReader<TCHAR>> Reader = TJsonReaderFactory<TCHAR>::Create(Response->GetContentAsString());
-		
 		//Deserialize the json data given Reader and the actual object to deserialize
 		if (FJsonSerializer::Deserialize(Reader, JsonParsed)) {
 			TArray<TSharedPtr<FJsonValue>> allCommits = JsonParsed->AsArray();
@@ -76,6 +70,7 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 		} else {
 			UE_LOG(LogTemp, Error, TEXT("Parsing of json data failed"));
 		}
+		//Set the database to know it has got data now
 		this->database->dbGotData = true;
 	} else {
 		if (Response.IsValid()) {
@@ -86,16 +81,3 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 		}
 	}
 }
-
-TArray<FArr> ARestActor::RetrieveWholeHistory() {
-	return this->database->RetrieveWholeHistory();
-}
-
-//void ARestActor::CreateTree(TArray<FArr> history)
-//{
-//	for (auto iter : history) {
-//		auto what = this->CreateDefaultSubobject<UCommitComponent>();
-//		//auto something = this->CreateDefaultSubobject<UCommitComponent>(TEXT("Test"));
-//		
-//	}
-//}
