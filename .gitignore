@@ -63,6 +63,7 @@ Saved/Config/Windows/*
 !Saved/Config/Windows/Engine.ini
 
 Content/*
+!Content/Blueprints
 !Content/StarterContent
 Content/StarterContent/*
 !Content/StarterContent/Shapes
