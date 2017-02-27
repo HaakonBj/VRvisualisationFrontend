@@ -10,7 +10,9 @@ ACommitActor::ACommitActor() {
 	this->rootSphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
 	this->RootComponent = this->rootSphereComponent;
 	this->rootSphereComponent->InitSphereRadius(5.0f);
-	this->sphereVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualRepresentation"));
+	
+	PrimaryActorTick.bCanEverTick = true;
+	this->sphereVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CommitVisualRep"));
 	this->sphereVisual->SetupAttachment(rootSphereComponent);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereVisualAsset(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
 	if (SphereVisualAsset.Succeeded()) {
@@ -21,7 +23,6 @@ ACommitActor::ACommitActor() {
 	else {
 		UE_LOG(LogTemp, Error, TEXT("Failed loading Mesh for Rest Actor root mesh component!"));
 	}
-	PrimaryActorTick.bCanEverTick = true;
 }
 
 //TODO: check if have to turn on ticks for parent actor e.g. RestActor
@@ -32,7 +33,6 @@ void ACommitActor::Init(FArr data) {
 	this->date = data.arr[3];
 	this->parentOne = data.arr[4];
 	this->parentTwo = data.arr[5];
-	PrimaryActorTick.bCanEverTick = true;
 }
 
 // Called when the game starts

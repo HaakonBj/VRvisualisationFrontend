@@ -11,7 +11,7 @@ ARestActor::ARestActor() {
 	this->rootSphereComponent->InitSphereRadius(40.0f);
 	this->sphereVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualRepresentation"));
 	this->sphereVisual->SetupAttachment(rootSphereComponent);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereVisualAsset(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereVisualAsset(TEXT("/Game/StarterContent/Shapes/Shape_Cone.Shape_Cone"));
 	if (SphereVisualAsset.Succeeded()) {
 		sphereVisual->SetStaticMesh(SphereVisualAsset.Object);
 		sphereVisual->SetRelativeLocation(FVector(0.0f, 0.0f, -40.0f));
