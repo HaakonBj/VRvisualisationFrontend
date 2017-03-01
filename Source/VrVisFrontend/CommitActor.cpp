@@ -6,23 +6,23 @@
 
 //Sets default values for this component's properties
 ACommitActor::ACommitActor() {
-	this->DisableComponentsSimulatePhysics(); //possibly use actor->GetRootComponent()->SetSimulatePhysics( false ); in component
-	this->rootSphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
-	this->RootComponent = this->rootSphereComponent;
-	this->rootSphereComponent->InitSphereRadius(5.0f);
-	
+	this->rootSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+	this->RootComponent = this->rootSceneComponent;
 	PrimaryActorTick.bCanEverTick = true;
 	this->sphereVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CommitVisualRep"));
-	this->sphereVisual->SetupAttachment(rootSphereComponent);
+	this->sphereVisual->SetupAttachment(rootSceneComponent);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereVisualAsset(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
 	if (SphereVisualAsset.Succeeded()) {
 		sphereVisual->SetStaticMesh(SphereVisualAsset.Object);
-		sphereVisual->SetRelativeLocation(FVector(0.0f, 0.0f, -10.0f));
-		sphereVisual->SetWorldScale3D(FVector(0.8f));
+		sphereVisual->SetRelativeLocation(FVector(0.0f, 0.0f, -5.0f));
+		sphereVisual->SetWorldScale3D(FVector(0.1f));
 	}
 	else {
 		UE_LOG(LogTemp, Error, TEXT("Failed loading Mesh for Rest Actor root mesh component!"));
 	}
+	this->sphereVisual->SetMobility(EComponentMobility::Movable);
+	this->RootComponent->SetMobility(EComponentMobility::Movable);
+	this->DisableComponentsSimulatePhysics(); //possibly use actor->GetRootComponent()->SetSimulatePhysics( false ); in component
 }
 
 //TODO: check if have to turn on ticks for parent actor e.g. RestActor

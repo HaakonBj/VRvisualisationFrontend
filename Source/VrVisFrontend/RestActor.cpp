@@ -2,24 +2,27 @@
 
 #include "VrVisFrontend.h"
 #include "RestActor.h"
-#include "CommitActor.h"
 
 // Sets default values
 ARestActor::ARestActor() {
 	this->rootSphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
 	this->RootComponent = this->rootSphereComponent;
 	this->rootSphereComponent->InitSphereRadius(40.0f);
-	this->sphereVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualRepresentation"));
-	this->sphereVisual->SetupAttachment(rootSphereComponent);
+	this->coneVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualRepresentation"));
+	this->coneVisual->SetupAttachment(rootSphereComponent);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereVisualAsset(TEXT("/Game/StarterContent/Shapes/Shape_Cone.Shape_Cone"));
 	if (SphereVisualAsset.Succeeded()) {
-		sphereVisual->SetStaticMesh(SphereVisualAsset.Object);
-		sphereVisual->SetRelativeLocation(FVector(0.0f, 0.0f, -40.0f));
-		sphereVisual->SetWorldScale3D(FVector(0.8f));
+		coneVisual->SetStaticMesh(SphereVisualAsset.Object);
+		coneVisual->SetRelativeLocation(FVector(0.0f, 0.0f, -40.0f));
+		coneVisual->SetWorldScale3D(FVector(0.8f));
 	} else {
 		UE_LOG(LogTemp, Error, TEXT("Failed loading Mesh for Rest Actor root mesh component!"));
 	}
-	this->DisableComponentsSimulatePhysics(); //possibly use actor->GetRootComponent()->SetSimulatePhysics( false ); in component
+	//this->DisableComponentsSimulatePhysics(); //possibly use actor->GetRootComponent()->SetSimulatePhysics( false ); in component
+	this->indexCounter = 0;
+	this->coneVisual->SetMobility(EComponentMobility::Movable);
+	this->RootComponent->SetMobility(EComponentMobility::Movable);
+	this->newPosition = { 0,0,200 };
 }
 
 void ARestActor::InitRestActor() {
@@ -80,4 +83,23 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 			UE_LOG(LogTemp, Error, TEXT("The call to the backend failed! No response code was received!"));
 		}
 	}
+}
+//TODO: Find a better and correct way
+FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
+	//TArray<int> list;
+	this->indexCounter += 1;
+	const int spaceIncrease = 15;
+
+	if (current->GetParentTwo() == "NULL" && next->GetParentTwo() != "NULL") {
+		//list.Pop();
+		this->newPosition.Y = this->newPosition.Y + spaceIncrease;
+	} else if (current->GetParentTwo() != "NULL" && next->GetParentTwo() == "NULL") {
+		this->newPosition.Y = this->newPosition.Y - spaceIncrease;
+		//list.Add(this->indexCounter);
+	} else if (current->GetParentTwo() != "NULL" && next->GetParentTwo() != "NULL") {
+		this->newPosition.Y = this->newPosition.Y - spaceIncrease;
+		//list.Add(this->indexCounter);
+	}
+	this->newPosition.Z = this->newPosition.Z - spaceIncrease;
+	return this->newPosition;
 }

@@ -10,9 +10,9 @@ UCLASS()
 class VRVISFRONTEND_API ACommitActor : public AActor
 {
 	GENERATED_BODY()
-public:	
+public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
-	USphereComponent* rootSphereComponent;
+	USceneComponent* rootSceneComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	UStaticMeshComponent* sphereVisual;
 
