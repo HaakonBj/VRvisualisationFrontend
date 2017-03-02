@@ -20,6 +20,10 @@ public:
 	FHttpModule* Http;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category ="Rest")
 	ASqlConnect* database;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
+	TArray<ACommitActor*> CommitArray;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
+	TArray<int> list;
 	int indexCounter;
 	FVector newPosition;
 

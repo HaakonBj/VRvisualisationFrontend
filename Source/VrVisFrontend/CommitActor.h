@@ -49,10 +49,16 @@ public:
 	void SetDate(FString newDate);
 
 private:
+	UPROPERTY(VisibleAnywhere, Category = "Rest")
 	int id;
+	UPROPERTY(VisibleAnywhere, Category = "Rest")
 	FString sha;
+	UPROPERTY(VisibleAnywhere, Category = "Rest")
 	FString author;
+	UPROPERTY(VisibleAnywhere, Category = "Rest")
 	FString date;
+	UPROPERTY(VisibleAnywhere, Category = "Rest")
 	FString parentOne;
+	UPROPERTY(VisibleAnywhere, Category = "Rest")
 	FString parentTwo;
 };
