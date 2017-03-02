@@ -97,7 +97,7 @@ TArray<FString> ASqlConnect::SendQueryForSingleCommit(std::string statement) {
 
 TArray<FArr> ASqlConnect::RetrieveWholeHistory() {
 	std::string retrieveStatement =
-		"SELECT * FROM HISTORY;";
+		"SELECT * FROM HISTORY ORDER BY id ASC;";
 	return this->Query(retrieveStatement.c_str());
 }
 
