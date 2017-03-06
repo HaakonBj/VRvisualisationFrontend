@@ -90,17 +90,34 @@ FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
 	const int spaceIncrease = 15;
 	
 	if (current->GetParentTwo() == "NULL" && next->GetParentTwo() != "NULL") {
-
+		//check backwards next.getsha == array[x].parentOne
+			//store the trackindex for the last, 
+			//remove it from list, 
+			//when all has been checked use the last found index and place it in that track
+		//if multiple has been removed,
+			//move the 
+		
+		
+		
+		
+		//check list for next parent one 
+			//move back in Y x times 
+			//remove from list
+			//add next in the same index
+		//or 
+		// move back in Y ones and replace in list
 
 	} else if (current->GetParentTwo() == "NULL" && next->GetParentTwo() == "NULL") {
-
-
+		//place down
+		//replace in list
 	} else if (current->GetParentTwo() != "NULL" && next->GetParentTwo() != "NULL") {
-	
+		//check all in list if they have next.getsha() as parent if so remove them from list
+		//Move out to new track
+		//add to list
 
 	} else if (current->GetParentTwo() != "NULL" && next->GetParentTwo() == "NULL") {
-
-
+		//Move out to new track
+		//add to list
 	}
 	this->newPosition.Z -= spaceIncrease;
 	return this->newPosition;
