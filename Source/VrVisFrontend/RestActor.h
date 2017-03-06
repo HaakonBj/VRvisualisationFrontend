@@ -23,7 +23,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	TArray<ACommitActor*> CommitArray;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
-	TArray<int> list;
+		//TArray<int> list;
+	TArray<ACommitActor*> unclaimedParentList;
 	int indexCounter;
 	FVector newPosition;
 

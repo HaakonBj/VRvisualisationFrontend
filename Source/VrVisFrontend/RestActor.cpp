@@ -84,49 +84,72 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 		}
 	}
 }
-//TODO: Find a better and correct way
+
+
 FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
 	const int spaceIncrease = 15;
-
+	
 	if (current->GetParentTwo() == "NULL" && next->GetParentTwo() != "NULL") {
-		if (this->list.Num() != 0) {
-			int index = this->list.Pop();
-			//TODO log this and find the error:
-			if (this->list.Num() != 0 )
-			{
-				if (this->list.Last() == index)
-				{
-					this->list.RemoveAt(this->list.Num() -1);
-				}
-			}
-			
-			if (index > this->CommitArray.Num()) {
-				UE_LOG(LogTemp, Warning, TEXT("Tried to access an index greater than the array size, this should never happen!"));
-			} else {
-				this->newPosition.Y = this->CommitArray[index]->GetActorLocation().Y;
-				//UE_LOG(LogTemp, Warning, TEXT("oldPosition for commit %d is %s"), index, *this->CommitArray[index]->GetActorLocation().ToString());
-				//UE_LOG(LogTemp, Warning, TEXT("newPosition for commit %d is %s"), next->GetId(), *this->newPosition.ToString());
-				UE_LOG(LogTemp, Warning, TEXT("list info: num: %d, last was: %d"), list.Num(), index);
-				UE_LOG(LogTemp, Warning, TEXT("In the list there is: %d, as the last element"), list.Last());
-			}
-		} else {
-			UE_LOG(LogTemp, Warning, TEXT("I just tried poping of an empty list. Current: %d . Next: %d"), current->GetId(), next->GetId());
-			this->newPosition.Y = this->newPosition.Y + spaceIncrease;
-		}
-		//TODO: check if you only need current->GetParentTwo() != "NULL" on this and the next if test:
-	} else if (current->GetParentTwo() != "NULL" && next->GetParentTwo() == "NULL") {
-		this->newPosition.Y = this->newPosition.Y - spaceIncrease;
-		this->list.Add(this->indexCounter);
-		//UE_LOG(LogTemp, Warning, TEXT("I just added to the list: %d. The size of the array is now: %d"), this->indexCounter, list.Num());
-	} else if (current->GetParentTwo() != "NULL" && next->GetParentTwo() != "NULL") {
-		this->newPosition.Y = this->newPosition.Y - spaceIncrease;
-		this->list.Add(this->indexCounter);
-	}
-	this->newPosition.Z = this->newPosition.Z - spaceIncrease;
-	if (this->newPosition.Y < -120){
-		UE_LOG(LogTemp, Warning, TEXT("I moved further than -120 in y axis, there is a mistake, my pos is %s: "),*this->newPosition.ToString());
-	}
 
-	this->indexCounter += 1;
+
+	} else if (current->GetParentTwo() == "NULL" && next->GetParentTwo() == "NULL") {
+
+
+	} else if (current->GetParentTwo() != "NULL" && next->GetParentTwo() != "NULL") {
+	
+
+	} else if (current->GetParentTwo() != "NULL" && next->GetParentTwo() == "NULL") {
+
+
+	}
+	this->newPosition.Z -= spaceIncrease;
 	return this->newPosition;
 }
+
+
+//TODO: Find a better and correct way
+//FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
+//	const int spaceIncrease = 15;
+//
+//	if (current->GetParentTwo() == "NULL" && next->GetParentTwo() != "NULL") {
+//		if (this->list.Num() != 0) {
+//			int index = this->list.Pop();
+//			//TODO log this and find the error:
+//			if (this->list.Num() != 0 )
+//			{
+//				if (this->list.Last() == index)
+//				{
+//					this->list.RemoveAt(this->list.Num() -1);
+//				}
+//			}
+//			
+//			if (index > this->CommitArray.Num()) {
+//				UE_LOG(LogTemp, Warning, TEXT("Tried to access an index greater than the array size, this should never happen!"));
+//			} else {
+//				this->newPosition.Y = this->CommitArray[index]->GetActorLocation().Y;
+//				//UE_LOG(LogTemp, Warning, TEXT("oldPosition for commit %d is %s"), index, *this->CommitArray[index]->GetActorLocation().ToString());
+//				//UE_LOG(LogTemp, Warning, TEXT("newPosition for commit %d is %s"), next->GetId(), *this->newPosition.ToString());
+//				UE_LOG(LogTemp, Warning, TEXT("list info: num: %d, last was: %d"), list.Num(), index);
+//				UE_LOG(LogTemp, Warning, TEXT("In the list there is: %d, as the last element"), list.Last());
+//			}
+//		} else {
+//			UE_LOG(LogTemp, Warning, TEXT("I just tried poping of an empty list. Current: %d . Next: %d"), current->GetId(), next->GetId());
+//			this->newPosition.Y = this->newPosition.Y + spaceIncrease;
+//		}
+//		//TODO: check if you only need current->GetParentTwo() != "NULL" on this and the next if test:
+//	} else if (current->GetParentTwo() != "NULL" && next->GetParentTwo() == "NULL") {
+//		this->newPosition.Y = this->newPosition.Y - spaceIncrease;
+//		this->list.Add(this->indexCounter);
+//		//UE_LOG(LogTemp, Warning, TEXT("I just added to the list: %d. The size of the array is now: %d"), this->indexCounter, list.Num());
+//	} else if (current->GetParentTwo() != "NULL" && next->GetParentTwo() != "NULL") {
+//		this->newPosition.Y = this->newPosition.Y - spaceIncrease;
+//		this->list.Add(this->indexCounter);
+//	}
+//	this->newPosition.Z = this->newPosition.Z - spaceIncrease;
+//	if (this->newPosition.Y < -120){
+//		UE_LOG(LogTemp, Warning, TEXT("I moved further than -120 in y axis, there is a mistake, my pos is %s: "),*this->newPosition.ToString());
+//	}
+//
+//	this->indexCounter += 1;
+//	return this->newPosition;
+//}
