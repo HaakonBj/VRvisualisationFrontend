@@ -88,85 +88,74 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 
 FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
 	const int spaceIncrease = 15;
-	
+	TArray<int> indexesToTrackListToRemove;
+	int lastIndex;
+	//Case where current has 1 parent og next has two parents
 	if (current->GetParentTwo() == "NULL" && next->GetParentTwo() != "NULL") {
-		//check backwards next.getsha == array[x].parentOne
-			//store the trackindex for the last, 
-			//remove it from list, 
-			//when all has been checked use the last found index and place it in that track
-		//if multiple has been removed,
-			//move the 
-		
-		
-		
-		
-		//check list for next parent one 
-			//move back in Y x times 
-			//remove from list
-			//add next in the same index
-		//or 
-		// move back in Y ones and replace in list
-
+		for (int i = 0; i < this->unclaimedParentList.Num(); i++) {
+			if (next->GetSha() == this->unclaimedParentList[i]->GetParentOne()) {
+				indexesToTrackListToRemove.Add(i);
+			}
+		}
+		if (indexesToTrackListToRemove.Num() > 0) {
+			lastIndex = indexesToTrackListToRemove[0];
+			for (int i = indexesToTrackListToRemove.Num() - 1; i > 0; i--) {
+				this->unclaimedParentList.RemoveAt(indexesToTrackListToRemove[i]);
+			}
+			this->unclaimedParentList[lastIndex] = next;
+		}
+		this->newPosition.Y = lastIndex * spaceIncrease;
+		//Case where both current and next has 1 parent
 	} else if (current->GetParentTwo() == "NULL" && next->GetParentTwo() == "NULL") {
-		//place down
-		//replace in list
+		for (int i = 0; i < this->unclaimedParentList.Num(); i++) {
+			if (next->GetSha() == this->unclaimedParentList[i]->GetParentOne()) {
+				indexesToTrackListToRemove.Add(i);
+			}
+		}
+		if (indexesToTrackListToRemove.Num() > 0) {
+			lastIndex = indexesToTrackListToRemove[0];
+			for (int i = indexesToTrackListToRemove.Num() - 1; i > 0; i--) {
+				this->unclaimedParentList.RemoveAt(indexesToTrackListToRemove[i]);
+			}
+			this->unclaimedParentList[lastIndex] = next;
+			this->newPosition.Y = lastIndex * spaceIncrease;
+		}
+		//Case where both current and next has 2 parents
 	} else if (current->GetParentTwo() != "NULL" && next->GetParentTwo() != "NULL") {
-		//check all in list if they have next.getsha() as parent if so remove them from list
-		//Move out to new track
-		//add to list
-
+		for (int i = 0; i < this->unclaimedParentList.Num(); i++) {
+			if (next->GetSha() == this->unclaimedParentList[i]->GetParentOne()) {
+				indexesToTrackListToRemove.Add(i);
+			}
+		}
+		if (indexesToTrackListToRemove.Num() > 0) {
+			lastIndex = indexesToTrackListToRemove[0];
+			for (int i = indexesToTrackListToRemove.Num() - 1; i > 0; i--) {
+				this->unclaimedParentList.RemoveAt(indexesToTrackListToRemove[i]);
+			}
+			this->unclaimedParentList[lastIndex] = next;
+			this->newPosition.Y = lastIndex * spaceIncrease;
+		} else {
+			this->newPosition.Y = this->unclaimedParentList.Num() * spaceIncrease;
+			this->unclaimedParentList.Add(next);
+		}
+		//Case where current has 2 parents and next has 1
 	} else if (current->GetParentTwo() != "NULL" && next->GetParentTwo() == "NULL") {
-		//Move out to new track
-		//add to list
+		//Handles the case where the next commit is a parent of an existing commit:
+		bool hasParent = false;
+		for (int i = 0; i < this->unclaimedParentList.Num(); i++) {
+			if (next->GetSha() == this->unclaimedParentList[i]->GetParentOne()) {
+				this->unclaimedParentList[i] = next;
+				this->newPosition.Y = i * spaceIncrease;
+				hasParent = true;
+			}
+		}
+		//Handles the case where the next commit is NOT a parent of an existing commit:
+		if (!hasParent) {
+			this->newPosition.Y = this->unclaimedParentList.Num() * spaceIncrease;
+			this->unclaimedParentList.Add(next);
+		}
 	}
+	//Always decrease the z direction (down)
 	this->newPosition.Z -= spaceIncrease;
 	return this->newPosition;
 }
-
-
-//TODO: Find a better and correct way
-//FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
-//	const int spaceIncrease = 15;
-//
-//	if (current->GetParentTwo() == "NULL" && next->GetParentTwo() != "NULL") {
-//		if (this->list.Num() != 0) {
-//			int index = this->list.Pop();
-//			//TODO log this and find the error:
-//			if (this->list.Num() != 0 )
-//			{
-//				if (this->list.Last() == index)
-//				{
-//					this->list.RemoveAt(this->list.Num() -1);
-//				}
-//			}
-//			
-//			if (index > this->CommitArray.Num()) {
-//				UE_LOG(LogTemp, Warning, TEXT("Tried to access an index greater than the array size, this should never happen!"));
-//			} else {
-//				this->newPosition.Y = this->CommitArray[index]->GetActorLocation().Y;
-//				//UE_LOG(LogTemp, Warning, TEXT("oldPosition for commit %d is %s"), index, *this->CommitArray[index]->GetActorLocation().ToString());
-//				//UE_LOG(LogTemp, Warning, TEXT("newPosition for commit %d is %s"), next->GetId(), *this->newPosition.ToString());
-//				UE_LOG(LogTemp, Warning, TEXT("list info: num: %d, last was: %d"), list.Num(), index);
-//				UE_LOG(LogTemp, Warning, TEXT("In the list there is: %d, as the last element"), list.Last());
-//			}
-//		} else {
-//			UE_LOG(LogTemp, Warning, TEXT("I just tried poping of an empty list. Current: %d . Next: %d"), current->GetId(), next->GetId());
-//			this->newPosition.Y = this->newPosition.Y + spaceIncrease;
-//		}
-//		//TODO: check if you only need current->GetParentTwo() != "NULL" on this and the next if test:
-//	} else if (current->GetParentTwo() != "NULL" && next->GetParentTwo() == "NULL") {
-//		this->newPosition.Y = this->newPosition.Y - spaceIncrease;
-//		this->list.Add(this->indexCounter);
-//		//UE_LOG(LogTemp, Warning, TEXT("I just added to the list: %d. The size of the array is now: %d"), this->indexCounter, list.Num());
-//	} else if (current->GetParentTwo() != "NULL" && next->GetParentTwo() != "NULL") {
-//		this->newPosition.Y = this->newPosition.Y - spaceIncrease;
-//		this->list.Add(this->indexCounter);
-//	}
-//	this->newPosition.Z = this->newPosition.Z - spaceIncrease;
-//	if (this->newPosition.Y < -120){
-//		UE_LOG(LogTemp, Warning, TEXT("I moved further than -120 in y axis, there is a mistake, my pos is %s: "),*this->newPosition.ToString());
-//	}
-//
-//	this->indexCounter += 1;
-//	return this->newPosition;
-//}

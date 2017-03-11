@@ -97,14 +97,14 @@ TArray<FString> ASqlConnect::SendQueryForSingleCommit(std::string statement) {
 
 TArray<FArr> ASqlConnect::RetrieveWholeHistory() {
 	std::string retrieveStatement =
-		"SELECT * FROM HISTORY ORDER BY id ASC;";
+		"SELECT * FROM HISTORY ORDER BY id;";
 	return this->Query(retrieveStatement.c_str());
 }
 
 //TODO handle more than 2 parents:
 std::string ASqlConnect::CreateSQLTableStatement() {
 	std::string sqlCreateTable = "CREATE TABLE HISTORY(" \
-		"id INT PRIMARY KEY		NOT NULL,"	\
+		"id				INT		NOT NULL,"	\
 		"sha			TEXT	NOT NULL,"	\
 		"author			TEXT	NOT NULL,"	\
 		"commitdate		TEXT	NOT NULL,"	\
