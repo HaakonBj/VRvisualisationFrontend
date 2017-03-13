@@ -35,12 +35,10 @@ void ACommitActor::Init(FArr data) {
 	this->parentTwo = data.arr[5];
 }
 
-// Called when the game starts
 void ACommitActor::BeginPlay() {
 	Super::BeginPlay();
 }
 
-// Called every frame
 void ACommitActor::Tick( float DeltaSeconds) {
 	Super::Tick(DeltaSeconds);
 }

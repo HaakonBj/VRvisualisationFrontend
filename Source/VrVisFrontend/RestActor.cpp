@@ -124,6 +124,10 @@ void ARestActor::UpdatePosition(ACommitActor* current, ACommitActor* next) {
 		this->lastIndex = this->indexesToTrackListToRemove[0];
 		for (int i = this->indexesToTrackListToRemove.Num() - 1; i > 0; i--) {
 			this->UnclaimedParentList.RemoveAt(this->indexesToTrackListToRemove[i]);
+			//spawn horizontal connection
+			int tempPosY = (this->indexesToTrackListToRemove[i] - 1) * this->spaceIncrease;
+			AConnectionActor* conActor = this->CreateConnectionActor(tempPosY, true);
+			this->ConnectionArray.Add(conActor);
 		}
 		this->UnclaimedParentList[this->lastIndex] = next;
 		this->newPosition.Y = this->lastIndex * this->spaceIncrease;
@@ -147,11 +151,20 @@ void ARestActor::UpdateConnections() {
 		}
 	}
 }
-//
-//AConnectionActor * ARestActor::CreateConnectionActor() {
-//	AConnectionActor* connectionActor = this->GetWorld()->SpawnActor<AConnectionActor>();
-//	FVector pos = newPosition;
-//	pos.Z = pos.Z - this->spaceIncrease;
-//	connectionActor->SetActorLocation(pos);
-//	return connectionActor;
-//}
+//TODO: instead of calculating Z multiple times, do it once.
+AConnectionActor * ARestActor::CreateConnectionActor(int y, bool horizontal) {
+	AConnectionActor* connectionActor = this->GetWorld()->SpawnActor<AConnectionActor>();
+	FVector pos = newPosition;
+	pos.Y = y;
+	pos.Z = newPosition.Z - this->spaceIncrease;
+	connectionActor->SetActorLocation(pos);
+	//Might need to check what side it is from left or right:
+	if (horizontal) {
+		connectionActor->setHorizontal();
+		FRotator rotator = connectionActor->GetActorRotation();
+		rotator.Roll += 90;
+		connectionActor->SetActorRotation(rotator);
+		connectionActor->SetMergeConnection();
+	}
+	return connectionActor;
+}

@@ -13,7 +13,7 @@ UCLASS()
 class VRVISFRONTEND_API ARestActor : public AActor
 {
 	GENERATED_BODY()
-public:	
+public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	USphereComponent* rootSphereComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
@@ -25,11 +25,11 @@ public:
 	TArray<ACommitActor*> CommitArray;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	TArray<ACommitActor*> UnclaimedParentList;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	TArray<AConnectionActor*> ConnectionArray;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	TArray<AConnectionActor*> UnclaimedConnectionList;
-
 
 	FVector newPosition;
 	const int spaceIncrease = 15;
@@ -48,7 +48,7 @@ public:
 	FVector FindPosition(ACommitActor* current, ACommitActor* next);
 	void UpdatePosition(ACommitActor* current, ACommitActor* next);
 	void UpdateConnections();
-	AConnectionActor * CreateConnectionActor();
+	AConnectionActor * CreateConnectionActor(int y, bool horizontal);
 
 	~ARestActor();
 };
