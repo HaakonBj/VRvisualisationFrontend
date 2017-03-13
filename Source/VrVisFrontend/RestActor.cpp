@@ -127,6 +127,9 @@ void ARestActor::UpdatePosition(ACommitActor* current, ACommitActor* next) {
 		}
 		this->UnclaimedParentList[this->lastIndex] = next;
 		this->newPosition.Y = this->lastIndex * this->spaceIncrease;
+	} else {
+		this->newPosition.Y = this->UnclaimedParentList.Num() * spaceIncrease;
+		this->UnclaimedParentList.Add(next);
 	}
 }
 
