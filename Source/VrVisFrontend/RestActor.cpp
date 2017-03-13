@@ -3,7 +3,6 @@
 #include "VrVisFrontend.h"
 #include "RestActor.h"
 
-// Sets default values
 ARestActor::ARestActor() {
 	this->rootSphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
 	this->RootComponent = this->rootSphereComponent;
@@ -19,10 +18,12 @@ ARestActor::ARestActor() {
 		UE_LOG(LogTemp, Error, TEXT("Failed loading Mesh for Rest Actor root mesh component!"));
 	}
 	//this->DisableComponentsSimulatePhysics(); //possibly use actor->GetRootComponent()->SetSimulatePhysics( false ); in component
-	this->indexCounter = 0;
 	this->coneVisual->SetMobility(EComponentMobility::Movable);
 	this->RootComponent->SetMobility(EComponentMobility::Movable);
-	this->newPosition = { 0,0,200 };
+	this->newPosition = {0, 0, 200};
+	this->lastUsedConnectionIndex = 0;
+	this->UnclaimedConnectionList.Reserve(2500);
+	this->UnclaimedParentList.Reserve(2500);
 }
 
 void ARestActor::InitRestActor() {
@@ -85,77 +86,69 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 	}
 }
 
-
 FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
-	const int spaceIncrease = 15;
-	TArray<int> indexesToTrackListToRemove;
-	int lastIndex;
-	//Case where current has 1 parent og next has two parents
-	if (current->GetParentTwo() == "NULL" && next->GetParentTwo() != "NULL") {
-		for (int i = 0; i < this->unclaimedParentList.Num(); i++) {
-			if (next->GetSha() == this->unclaimedParentList[i]->GetParentOne()) {
-				indexesToTrackListToRemove.Add(i);
-			}
-		}
-		if (indexesToTrackListToRemove.Num() > 0) {
-			lastIndex = indexesToTrackListToRemove[0];
-			for (int i = indexesToTrackListToRemove.Num() - 1; i > 0; i--) {
-				this->unclaimedParentList.RemoveAt(indexesToTrackListToRemove[i]);
-			}
-			this->unclaimedParentList[lastIndex] = next;
-		}
-		this->newPosition.Y = lastIndex * spaceIncrease;
-		//Case where both current and next has 1 parent
-	} else if (current->GetParentTwo() == "NULL" && next->GetParentTwo() == "NULL") {
-		for (int i = 0; i < this->unclaimedParentList.Num(); i++) {
-			if (next->GetSha() == this->unclaimedParentList[i]->GetParentOne()) {
-				indexesToTrackListToRemove.Add(i);
-			}
-		}
-		if (indexesToTrackListToRemove.Num() > 0) {
-			lastIndex = indexesToTrackListToRemove[0];
-			for (int i = indexesToTrackListToRemove.Num() - 1; i > 0; i--) {
-				this->unclaimedParentList.RemoveAt(indexesToTrackListToRemove[i]);
-			}
-			this->unclaimedParentList[lastIndex] = next;
-			this->newPosition.Y = lastIndex * spaceIncrease;
-		}
-		//Case where both current and next has 2 parents
-	} else if (current->GetParentTwo() != "NULL" && next->GetParentTwo() != "NULL") {
-		for (int i = 0; i < this->unclaimedParentList.Num(); i++) {
-			if (next->GetSha() == this->unclaimedParentList[i]->GetParentOne()) {
-				indexesToTrackListToRemove.Add(i);
-			}
-		}
-		if (indexesToTrackListToRemove.Num() > 0) {
-			lastIndex = indexesToTrackListToRemove[0];
-			for (int i = indexesToTrackListToRemove.Num() - 1; i > 0; i--) {
-				this->unclaimedParentList.RemoveAt(indexesToTrackListToRemove[i]);
-			}
-			this->unclaimedParentList[lastIndex] = next;
-			this->newPosition.Y = lastIndex * spaceIncrease;
-		} else {
-			this->newPosition.Y = this->unclaimedParentList.Num() * spaceIncrease;
-			this->unclaimedParentList.Add(next);
-		}
-		//Case where current has 2 parents and next has 1
-	} else if (current->GetParentTwo() != "NULL" && next->GetParentTwo() == "NULL") {
-		//Handles the case where the next commit is a parent of an existing commit:
+	this->indexesToTrackListToRemove.Empty();
+	//Case where current has 2 parents and next has 1
+	if (current->GetParentTwo() != "NULL" && next->GetParentTwo() == "NULL") {
+	//Handles the case where the next commit is a parent of an existing commit:
 		bool hasParent = false;
-		for (int i = 0; i < this->unclaimedParentList.Num(); i++) {
-			if (next->GetSha() == this->unclaimedParentList[i]->GetParentOne()) {
-				this->unclaimedParentList[i] = next;
-				this->newPosition.Y = i * spaceIncrease;
+		for (int i = 0; i < this->UnclaimedParentList.Num(); i++) {
+			if (next->GetSha() == this->UnclaimedParentList[i]->GetParentOne()) {
+				this->UnclaimedParentList[i] = next;
+				this->newPosition.Y = i * this->spaceIncrease;
 				hasParent = true;
 			}
 		}
 		//Handles the case where the next commit is NOT a parent of an existing commit:
 		if (!hasParent) {
-			this->newPosition.Y = this->unclaimedParentList.Num() * spaceIncrease;
-			this->unclaimedParentList.Add(next);
+			this->newPosition.Y = this->UnclaimedParentList.Num() * this->spaceIncrease;
+			this->UnclaimedParentList.Add(next);
 		}
+	} else {
+		this->UpdatePosition(current, next);
 	}
 	//Always decrease the z direction (down)
-	this->newPosition.Z -= spaceIncrease;
+	this->newPosition.Z -= this->spaceIncrease;
 	return this->newPosition;
 }
+
+//Handles the position update for most parent cases when positioning.
+//See RestActor::FindPosition for the only case that does not work with this
+void ARestActor::UpdatePosition(ACommitActor* current, ACommitActor* next) {
+	for (int i = 0; i < this->UnclaimedParentList.Num(); i++) {
+		if (next->GetSha() == this->UnclaimedParentList[i]->GetParentOne()) {
+			this->indexesToTrackListToRemove.Add(i);
+		}
+	}
+	if (this->indexesToTrackListToRemove.Num() > 0) {
+		this->lastIndex = this->indexesToTrackListToRemove[0];
+		for (int i = this->indexesToTrackListToRemove.Num() - 1; i > 0; i--) {
+			this->UnclaimedParentList.RemoveAt(this->indexesToTrackListToRemove[i]);
+		}
+		this->UnclaimedParentList[this->lastIndex] = next;
+		this->newPosition.Y = this->lastIndex * this->spaceIncrease;
+	}
+}
+
+void ARestActor::UpdateConnections() {
+	FVector currentPosition;
+	FVector currentScale;
+	for (int i = 0; i < this->UnclaimedConnectionList.Num(); i++) {
+		if (i != this->lastUsedConnectionIndex) {
+			currentPosition = this->UnclaimedConnectionList[i]->GetActorLocation();
+			currentPosition.Z = currentPosition.Z + (this->spaceIncrease / 2);
+			this->UnclaimedConnectionList[i]->SetActorLocation(currentPosition);
+			currentScale = this->UnclaimedConnectionList[i]->GetActorScale3D();
+			currentScale.Z += 0.5;
+			this->UnclaimedConnectionList[i]->SetActorScale3D(currentScale);
+		}
+	}
+}
+//
+//AConnectionActor * ARestActor::CreateConnectionActor() {
+//	AConnectionActor* connectionActor = this->GetWorld()->SpawnActor<AConnectionActor>();
+//	FVector pos = newPosition;
+//	pos.Z = pos.Z - this->spaceIncrease;
+//	connectionActor->SetActorLocation(pos);
+//	return connectionActor;
+//}

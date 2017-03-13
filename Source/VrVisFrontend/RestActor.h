@@ -6,6 +6,7 @@
 #include "Runtime/Online/HTTP/Public/Http.h"
 #include "SqlConnect.h"
 #include "CommitActor.h"
+#include "ConnectionActor.h"
 #include "RestActor.generated.h"
 
 UCLASS()
@@ -23,11 +24,19 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	TArray<ACommitActor*> CommitArray;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
-		//TArray<int> list;
-	TArray<ACommitActor*> unclaimedParentList;
-	int indexCounter;
-	FVector newPosition;
+	TArray<ACommitActor*> UnclaimedParentList;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
+	TArray<AConnectionActor*> ConnectionArray;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
+	TArray<AConnectionActor*> UnclaimedConnectionList;
 
+
+	FVector newPosition;
+	const int spaceIncrease = 15;
+	TArray<int> indexesToTrackListToRemove;
+	TArray<int> indexesToConnectionListToRemove;
+	int lastIndex;
+	int lastUsedConnectionIndex;
 	ARestActor();
 	virtual void BeginPlay() override;
 	UFUNCTION(BlueprintCallable, Category = "Rest")
@@ -37,6 +46,9 @@ public:
 	void InitRestActor();
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	FVector FindPosition(ACommitActor* current, ACommitActor* next);
+	void UpdatePosition(ACommitActor* current, ACommitActor* next);
+	void UpdateConnections();
+	AConnectionActor * CreateConnectionActor();
 
 	~ARestActor();
 };
