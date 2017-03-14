@@ -33,7 +33,8 @@ public:
 
 	FVector newPosition;
 	const int spaceIncrease = 15;
-	const int baseRotation = 225;
+	const int baseRotationForBranchConnection = 225;
+	const int baseRotationForMergeConnection = 90;
 	TArray<int> indexesToTrackListToRemove;
 	TArray<int> indexesToConnectionListToRemove;
 	int lastIndex;
@@ -49,6 +50,6 @@ public:
 	FVector FindPosition(ACommitActor* current, ACommitActor* next);
 	void UpdatePosition(ACommitActor* current, ACommitActor* next);
 	void UpdateConnections();
-	AConnectionActor * CreateConnectionActor(int yPos, int zScale, float degreesToRotate);
+	AConnectionActor * CreateConnectionActor(FVector conPosition, int zScale, float degreesToRotate);
 	~ARestActor();
 };
