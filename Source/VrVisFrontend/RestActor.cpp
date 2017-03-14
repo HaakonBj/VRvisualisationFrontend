@@ -120,13 +120,24 @@ void ARestActor::UpdatePosition(ACommitActor* current, ACommitActor* next) {
 			this->indexesToTrackListToRemove.Add(i);
 		}
 	}
+	if (next->GetSha() == "3127483d035b26e8f05f45e653bb400da588e7e4")
+	{
+		UE_LOG(LogTemp, Warning, TEXT("At the correct point"));
+	}
+
+
+	FVector horizontalConnectionPos = current->GetActorLocation();
 	if (this->indexesToTrackListToRemove.Num() > 0) {
 		this->lastIndex = this->indexesToTrackListToRemove[0];
 		for (int i = this->indexesToTrackListToRemove.Num() - 1; i > 0; i--) {
 			this->UnclaimedParentList.RemoveAt(this->indexesToTrackListToRemove[i]);
-			//spawn horizontal connection
-			int tempPosY = (this->indexesToTrackListToRemove[i] - 1) * this->spaceIncrease;
-			AConnectionActor* conActor = this->CreateConnectionActor(tempPosY, true);
+			//This is where you can rotate around the z axis to create the circle
+			//Spawn horizontal upwards connectors
+			int currentIndex = this->indexesToTrackListToRemove[i];
+			int numberOfTracksBetween = currentIndex - this->lastIndex;
+			float stepDegree = 45 - (45 / numberOfTracksBetween);
+			float yPos = this->indexesToTrackListToRemove[i] * this->spaceIncrease;
+			AConnectionActor* conActor = this->CreateConnectionActor(yPos, numberOfTracksBetween, this->baseRotation + stepDegree);
 			this->ConnectionArray.Add(conActor);
 		}
 		this->UnclaimedParentList[this->lastIndex] = next;
@@ -151,20 +162,17 @@ void ARestActor::UpdateConnections() {
 		}
 	}
 }
-//TODO: instead of calculating Z multiple times, do it once.
-AConnectionActor * ARestActor::CreateConnectionActor(int y, bool horizontal) {
+//Create connectionActor with special y position and scale in z direction with specific rotation
+AConnectionActor * ARestActor::CreateConnectionActor(int yPos, int zScale, float degreesToRotate) {
 	AConnectionActor* connectionActor = this->GetWorld()->SpawnActor<AConnectionActor>();
 	FVector pos = newPosition;
-	pos.Y = y;
-	pos.Z = newPosition.Z - this->spaceIncrease;
+	pos.Y = yPos;
+	pos.Z = newPosition.Z;
 	connectionActor->SetActorLocation(pos);
-	//Might need to check what side it is from left or right:
-	if (horizontal) {
-		connectionActor->setHorizontal();
-		FRotator rotator = connectionActor->GetActorRotation();
-		rotator.Roll += 90;
-		connectionActor->SetActorRotation(rotator);
-		connectionActor->SetMergeConnection();
-	}
+	connectionActor->setHorizontal();
+	FRotator rotator = connectionActor->GetActorRotation();
+	rotator.Roll += degreesToRotate;
+	connectionActor->SetActorRotation(rotator);
+	connectionActor->SetActorScale3D(FVector(1, 1, zScale));
 	return connectionActor;
 }

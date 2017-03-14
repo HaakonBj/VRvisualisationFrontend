@@ -15,7 +15,7 @@ AConnectionActor::AConnectionActor() {
 	if (CylinderVisualAsset.Succeeded()) {
 		cylinderVisual->SetStaticMesh(CylinderVisualAsset.Object);
 		cylinderVisual->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
-		cylinderVisual->SetWorldScale3D(FVector(0.02373, 0.021641, 0.151469));
+		cylinderVisual->SetWorldScale3D(FVector(0.02373, 0.021641, 0.151569));
 	} else {
 		UE_LOG(LogTemp, Error, TEXT("Failed loading Mesh for Rest Actor root mesh component!"));
 	}
@@ -39,7 +39,7 @@ void AConnectionActor::setHorizontal() {
 }
 
 void AConnectionActor::SetMergeConnection() {
-	float cylinderRadius;
+	/*float cylinderRadius;
 	float cylinderHalfHeight;
 	this->sceneComponentForMergeComponent = NewObject<USceneComponent>(this, USceneComponent::StaticClass(), TEXT("PlacementRepresentationForMergeAddition"));
 	this->sceneComponentForMergeComponent->SetMobility(EComponentMobility::Movable);
@@ -57,7 +57,7 @@ void AConnectionActor::SetMergeConnection() {
 	this->cylinderVisualMergeAddition->SetWorldScale3D(FVector(0.02373, 0.021641, 0.151469));
 	this->cylinderVisualMergeAddition->SetMobility(EComponentMobility::Movable);
 	this->cylinderVisualMergeAddition->RegisterComponent();
-	this->cylinderVisualMergeAddition->K2_AttachToComponent(this->sceneComponentForMergeComponent, NAME_None, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative,false);
+	this->cylinderVisualMergeAddition->K2_AttachToComponent(this->sceneComponentForMergeComponent, NAME_None, EAttachmentRule::KeepRelative, EAttachmentRule::KeepWorld,EAttachmentRule::KeepRelative,false);*/
 }
 
 // Called when the game starts or when spawned
