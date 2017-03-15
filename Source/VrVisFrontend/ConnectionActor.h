@@ -6,11 +6,10 @@
 #include "ConnectionActor.generated.h"
 
 UCLASS()
-class VRVISFRONTEND_API AConnectionActor : public AActor
-{
+class VRVISFRONTEND_API AConnectionActor : public AActor {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	USceneComponent* rootSceneComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")

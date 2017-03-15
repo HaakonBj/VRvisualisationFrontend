@@ -113,14 +113,14 @@ FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
 			stepDegree = 45 / numberOfTracksBetween;
 			AConnectionActor* conActor = this->CreateConnectionActor(current->GetActorLocation(), numberOfTracksBetween, this->baseRotationForMergeConnection + stepDegree);
 			this->ConnectionArray.Add(conActor);
-		}
-		else {
+		} else {
 			UE_LOG(LogTemp, Warning, TEXT("Could not find commit %s"), *current->GetSha());
 		}
 	} else {
 		this->UpdatePosition(current, next);
 	}
 	//Always decrease the z direction (down)
+	this->UpdateConnections(current);
 	this->newPosition.Z -= this->spaceIncrease;
 	return this->newPosition;
 }
@@ -130,6 +130,10 @@ FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
 void ARestActor::UpdatePosition(ACommitActor* current, ACommitActor* next) {
 	int numberOfTracksBetween;
 	float stepDegree;
+
+	if (next->GetSha() == "ef27a14eaea43468f05a22eae6f1908278c69c87") {
+		UE_LOG(LogTemp, Warning, TEXT("Placing commit %s"), *next->GetSha());
+	}
 
 	for (int i = 0; i < this->UnclaimedParentList.Num(); i++) {
 		if (next->GetSha() == this->UnclaimedParentList[i]->GetParentOne()) {
@@ -178,19 +182,35 @@ void ARestActor::UpdatePosition(ACommitActor* current, ACommitActor* next) {
 		}
 	}
 }
-
-void ARestActor::UpdateConnections() {
-	FVector currentPosition;
-	FVector currentScale;
-	for (int i = 0; i < this->UnclaimedConnectionList.Num(); i++) {
-		if (i != this->lastUsedConnectionIndex) {
-			currentPosition = this->UnclaimedConnectionList[i]->GetActorLocation();
-			currentPosition.Z = currentPosition.Z + (this->spaceIncrease / 2);
-			this->UnclaimedConnectionList[i]->SetActorLocation(currentPosition);
-			currentScale = this->UnclaimedConnectionList[i]->GetActorScale3D();
-			currentScale.Z += 0.5;
-			this->UnclaimedConnectionList[i]->SetActorScale3D(currentScale);
+//TODO pass by reference instead?
+void ARestActor::UpdateConnections(ACommitActor* current) {
+	if (this->lastUsedConnectionIndex == this->UnclaimedParentList.Num() - 1) {
+		//Commit was added in existing tracklist entry
+		if (this->UnclaimedConnectionList.Num() < this->UnclaimedParentList.Num()) {
+			this->CreateVerticalConnection(current->GetActorLocation());
 		}
+	} else if (this->lastUsedConnectionIndex < this->UnclaimedParentList.Num() - 1) {
+		//Commit was added in tracklist
+		if (this->UnclaimedParentList.Num() - this->UnclaimedConnectionList.Num() != 1) {
+			this->CreateVerticalConnection(current->GetActorLocation());
+		}
+		this->lastUsedConnectionIndex++;
+	} else if (this->lastUsedConnectionIndex > this->UnclaimedParentList.Num() - 1) {
+		//Commit was removed from tracklist
+		if (this->UnclaimedConnectionList.Num() > this->UnclaimedParentList.Num()) {
+			int startIndexToRemove = this->UnclaimedParentList.Num();
+			int endIndexToRemove = this->UnclaimedConnectionList.Num() - startIndexToRemove;
+			this->UnclaimedConnectionList.RemoveAt(startIndexToRemove, endIndexToRemove);
+			this->lastUsedConnectionIndex = this->UnclaimedParentList.Num() - 1;
+		} else {
+			this->lastUsedConnectionIndex--;
+		}
+	}
+	FVector scale;
+	for (auto * connection : this->UnclaimedConnectionList) {
+		scale = connection->GetActorScale();
+		scale.Z += 1;
+		connection->SetActorScale3D(scale);
 	}
 }
 //TODO: When finished check if you need to return the connection actors from CreateConnectionActor() functions
@@ -203,4 +223,14 @@ AConnectionActor * ARestActor::CreateConnectionActor(FVector conPosition, int zS
 	connectionActor->SetActorRotation(rotator);
 	connectionActor->SetActorScale3D(FVector(1, 1, zScale));
 	return connectionActor;
+}
+
+void ARestActor::CreateVerticalConnection(FVector position) {
+	AConnectionActor* conActor = this->GetWorld()->SpawnActor<AConnectionActor>();
+	conActor->SetActorLocation(position);
+	FRotator rotator = conActor->GetActorRotation();
+	rotator.Roll += this->baseRotationForVerticalConnection;
+	conActor->SetActorRotation(rotator);
+	this->UnclaimedConnectionList.Add(conActor);
+	this->ConnectionArray.Add(conActor);
 }

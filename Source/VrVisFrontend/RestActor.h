@@ -10,8 +10,7 @@
 #include "RestActor.generated.h"
 
 UCLASS()
-class VRVISFRONTEND_API ARestActor : public AActor
-{
+class VRVISFRONTEND_API ARestActor : public AActor {
 	GENERATED_BODY()
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
@@ -30,11 +29,12 @@ public:
 	TArray<AConnectionActor*> ConnectionArray;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	TArray<AConnectionActor*> UnclaimedConnectionList;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	FVector newPosition;
 	const int spaceIncrease = 15;
 	const int baseRotationForBranchConnection = 225;
 	const int baseRotationForMergeConnection = 90;
+	const int baseRotationForVerticalConnection = 180;
 	TArray<int> indexesToTrackListToRemove;
 	TArray<int> indexesToConnectionListToRemove;
 	int lastIndex;
@@ -49,7 +49,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	FVector FindPosition(ACommitActor* current, ACommitActor* next);
 	void UpdatePosition(ACommitActor* current, ACommitActor* next);
-	void UpdateConnections();
+	void UpdateConnections(ACommitActor* current);
 	AConnectionActor * CreateConnectionActor(FVector conPosition, int zScale, float degreesToRotate);
+	UFUNCTION(BlueprintCallable, Category = "Rest")
+	void CreateVerticalConnection(FVector position/*, int index*/);
+	void RemoveVerticalConnection();
 	~ARestActor();
 };
