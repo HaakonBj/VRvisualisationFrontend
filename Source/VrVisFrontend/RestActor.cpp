@@ -88,6 +88,9 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 
 FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
 	this->indexesToTrackListToRemove.Empty();
+	float numberOfTracksBetween;
+	float stepDegree;
+	int index = 0;
 	//Case where current has 2 parents and next has 1
 	if (current->GetParentTwo() != "NULL" && next->GetParentTwo() == "NULL") {
 	//Handles the case where the next commit is a parent of an existing commit:
@@ -97,12 +100,22 @@ FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
 				this->UnclaimedParentList[i] = next;
 				this->newPosition.Y = i * this->spaceIncrease;
 				hasParent = true;
+				index = i;
 			}
 		}
 		//Handles the case where the next commit is NOT a parent of an existing commit:
 		if (!hasParent) {
 			this->newPosition.Y = this->UnclaimedParentList.Num() * this->spaceIncrease;
-			this->UnclaimedParentList.Add(next);
+			index = this->UnclaimedParentList.Add(next);
+		}
+		if (this->UnclaimedParentList.Find(current, this->lastIndex)) {
+			numberOfTracksBetween = index - this->lastIndex;
+			stepDegree = 45 / numberOfTracksBetween;
+			AConnectionActor* conActor = this->CreateConnectionActor(current->GetActorLocation(), numberOfTracksBetween, this->baseRotationForMergeConnection + stepDegree);
+			this->ConnectionArray.Add(conActor);
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("Could not find commit %s"), *current->GetSha());
 		}
 	} else {
 		this->UpdatePosition(current, next);
@@ -142,10 +155,19 @@ void ARestActor::UpdatePosition(ACommitActor* current, ACommitActor* next) {
 		}
 		this->UnclaimedParentList[this->lastIndex] = next;
 		this->newPosition.Y = this->lastIndex * this->spaceIncrease;
+		//Create certain merge connections for cases where current and next has 2 parents and next has branches from it
+		//case: f2a1f615df927fd137dc428e7d6c73a1f128ca40 and 63d1f70bae6c4a775f87b4e5f3f3437c50c6c8dc
+		int index;
+		if (this->UnclaimedParentList.Find(current, index) && current->GetParentTwo() == next->GetSha()){
+			numberOfTracksBetween = this->lastIndex - index;
+			stepDegree = 45 / numberOfTracksBetween;
+			AConnectionActor* conActor = this->CreateConnectionActor(current->GetActorLocation(), numberOfTracksBetween, this->baseRotationForMergeConnection + stepDegree);
+			this->ConnectionArray.Add(conActor);
+		}
 	} else {
 		this->newPosition.Y = this->UnclaimedParentList.Num() * spaceIncrease;
 		int index = this->UnclaimedParentList.Add(next);
-		//Creates certain merge connections:
+		//Creates certain merge connections where no branches are comming from next (e.g. case 1 & 1, 1 & 2 and 2 & 2):
 		if (this->UnclaimedParentList.Find(current, this->lastIndex)) {
 			numberOfTracksBetween = index - this->lastIndex;
 			stepDegree = 45 / numberOfTracksBetween;
@@ -154,7 +176,6 @@ void ARestActor::UpdatePosition(ACommitActor* current, ACommitActor* next) {
 		} else {
 			UE_LOG(LogTemp, Warning, TEXT("Could not find commit %s"), *current->GetSha());
 		}
-		UE_LOG(LogTemp, Warning, TEXT("Current was %s"), *current->GetSha());
 	}
 }
 
