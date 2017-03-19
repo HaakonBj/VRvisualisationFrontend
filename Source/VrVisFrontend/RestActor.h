@@ -32,11 +32,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	FVector newPosition;
 	const int spaceIncrease = 15;
-	const int baseRotationForBranchConnection = 225;
+	const int baseRotationForBranchConnection = -90;
 	const int baseRotationForMergeConnection = 90;
 	const int baseRotationForVerticalConnection = 180;
 	TArray<int> indexesToTrackListToRemove;
-	TArray<int> indexesToConnectionListToRemove;
+	//TArray<int> indexesToConnectionListToRemove;
 	int lastIndex;
 	int lastUsedConnectionIndex;
 	ARestActor();
@@ -49,10 +49,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	FVector FindPosition(ACommitActor* current, ACommitActor* next);
 	void UpdatePosition(ACommitActor* current, ACommitActor* next);
-	void UpdateConnections(ACommitActor* current);
+	void UpdateConnections(ACommitActor* current, ACommitActor* next);
 	AConnectionActor * CreateConnectionActor(FVector conPosition, int zScale, float degreesToRotate);
 	UFUNCTION(BlueprintCallable, Category = "Rest")
-	void CreateVerticalConnection(FVector position/*, int index*/);
-	void RemoveVerticalConnection();
+	void CreateVerticalConnection(FVector position);
+	AConnectionActor * CreateAndReturnVerticalConnection(FVector position);
+	void ScaleVerticalConnections(int scaleToIndex);
 	~ARestActor();
 };

@@ -15,7 +15,7 @@ AConnectionActor::AConnectionActor() {
 	if (CylinderVisualAsset.Succeeded()) {
 		cylinderVisual->SetStaticMesh(CylinderVisualAsset.Object);
 		cylinderVisual->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
-		cylinderVisual->SetWorldScale3D(FVector(0.02373, 0.021641, 0.151569));
+		cylinderVisual->SetWorldScale3D(FVector(0.02373, 0.021641, 0.15));
 	} else {
 		UE_LOG(LogTemp, Error, TEXT("Failed loading Mesh for Rest Actor root mesh component!"));
 	}
