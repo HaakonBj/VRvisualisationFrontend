@@ -35,9 +35,9 @@ public:
 	const int baseRotationForBranchConnection = -90;
 	const int baseRotationForMergeConnection = 90;
 	const int baseRotationForVerticalConnection = 180;
-	TArray<int> indexesToTrackListToRemove;
-	//TArray<int> indexesToConnectionListToRemove;
-	int lastIndex;
+	const float quarterRotation = 22.5f;
+	TArray<int> indexesToParentListToRemove;
+	int indexToBeReplaced;
 	int lastUsedConnectionIndex;
 	ARestActor();
 	virtual void BeginPlay() override;
@@ -55,5 +55,6 @@ public:
 	void CreateVerticalConnection(FVector position);
 	AConnectionActor * CreateAndReturnVerticalConnection(FVector position);
 	void ScaleVerticalConnections(int scaleToIndex);
+	void SpawnHorizontalBranchConnection(int currentIndex);
 	~ARestActor();
 };

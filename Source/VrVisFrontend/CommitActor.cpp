@@ -51,7 +51,7 @@ void ACommitActor::SetId(int newId) {
 	this->id = newId;
 }
 
-FString ACommitActor::GetAuthor() {
+FString ACommitActor::GetAuthor() const {
 	return this->author;
 }
 
@@ -59,7 +59,7 @@ void ACommitActor::SetAuthor(FString newAuthor) {
 	this->author = newAuthor;
 }
 
-FString ACommitActor::GetSha() {
+FString ACommitActor::GetSha() const {
 	return this->sha;
 }
 
@@ -67,7 +67,7 @@ void ACommitActor::SetSha(FString newSha) {
 	this->sha = newSha;
 }
 
-FString ACommitActor::GetParentOne() {
+FString ACommitActor::GetParentOne() const {
 	return this->parentOne;
 }
 
@@ -75,7 +75,7 @@ void ACommitActor::SetParentOne(FString newParentOneSha) {
 	this->parentOne = newParentOneSha;
 }
 
-FString ACommitActor::GetParentTwo() {
+FString ACommitActor::GetParentTwo() const {
 	return this->parentTwo;
 }
 
@@ -83,7 +83,7 @@ void ACommitActor::SetParentTwo(FString newParentTwoSha) {
 	this->parentTwo = newParentTwoSha;
 }
 
-FString ACommitActor::GetDate() {
+FString ACommitActor::GetDate() const {
 	return this->date;
 }
 

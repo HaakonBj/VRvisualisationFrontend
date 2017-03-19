@@ -14,8 +14,7 @@ ARestActor::ARestActor() {
 		coneVisual->SetStaticMesh(SphereVisualAsset.Object);
 		coneVisual->SetRelativeLocation(FVector(0.0f, 0.0f, -40.0f));
 		coneVisual->SetWorldScale3D(FVector(0.8f));
-	}
-	else {
+	} else {
 		UE_LOG(LogTemp, Error, TEXT("Failed loading Mesh for Rest Actor root mesh component!"));
 	}
 	//this->DisableComponentsSimulatePhysics(); //possibly use actor->GetRootComponent()->SetSimulatePhysics( false ); in component
@@ -72,33 +71,27 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 				TArray<TSharedPtr<FJsonValue>> ParrentArray = commit->GetArrayField("parents");
 				this->database->AddCommit(id, sha, author, date, ParrentArray);
 			}
-		}
-		else {
+		} else {
 			UE_LOG(LogTemp, Error, TEXT("Parsing of json data failed"));
 		}
 		//Set the database to know it has got data now
 		this->database->dbGotData = true;
-	}
-	else {
+	} else {
 		if (Response.IsValid()) {
 			FString responseCode = FString::FromInt(Response->GetResponseCode());
 			UE_LOG(LogTemp, Error, TEXT("The call to the backend failed! Response code is %d"), *responseCode);
-		}
-		else {
+		} else {
 			UE_LOG(LogTemp, Error, TEXT("The call to the backend failed! No response code was received!"));
 		}
 	}
 }
 
 FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
-	this->indexesToTrackListToRemove.Empty();
+	this->indexesToParentListToRemove.Empty();
 	float numberOfTracksBetween;
 	float stepDegree;
 	int index = 0;
-	if (current->GetSha() == "c8b410bc8e9e8df76cb739e95f755858670f6840")
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Current's sha is: %s"), *current->GetSha());
-	}
+
 	//Case where current has 2 parents and next has 1
 	if (current->GetParentTwo() != "NULL" && next->GetParentTwo() == "NULL") {
 		//Handles the case where the next commit is a parent of an existing commit:
@@ -116,17 +109,15 @@ FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
 			this->newPosition.Y = this->UnclaimedParentList.Num() * this->spaceIncrease;
 			index = this->UnclaimedParentList.Add(next);
 		}
-		if (this->UnclaimedParentList.Find(current, this->lastIndex)) {
-			numberOfTracksBetween = index - this->lastIndex;
-			stepDegree = 22.5f / numberOfTracksBetween;
+		if (this->UnclaimedParentList.Find(current, this->indexToBeReplaced)) {
+			numberOfTracksBetween = index - this->indexToBeReplaced;
+			stepDegree = this->quarterRotation / numberOfTracksBetween;
 			AConnectionActor* conActor = this->CreateConnectionActor(current->GetActorLocation(), numberOfTracksBetween, this->baseRotationForMergeConnection + stepDegree);
 			this->ConnectionArray.Add(conActor);
-		}
-		else {
+		} else {
 			UE_LOG(LogTemp, Warning, TEXT("Could not find commit %s"), *current->GetSha());
 		}
-	}
-	else {
+	} else {
 		this->UpdatePosition(current, next);
 	}
 	//Always decrease the z direction (down)
@@ -140,121 +131,106 @@ FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
 void ARestActor::UpdatePosition(ACommitActor* current, ACommitActor* next) {
 	int numberOfTracksBetween;
 	float stepDegree;
-
-	//if (next->GetSha() == "ef27a14eaea43468f05a22eae6f1908278c69c87") {
-	//	UE_LOG(LogTemp, Warning, TEXT("Placing commit %s"), *next->GetSha());
-	//}
+	AConnectionActor* conActor;
 
 	for (int i = 0; i < this->UnclaimedParentList.Num(); i++) {
 		if (next->GetSha() == this->UnclaimedParentList[i]->GetParentOne()) {
-			this->indexesToTrackListToRemove.Add(i);
+			this->indexesToParentListToRemove.Add(i);
 		}
 	}
 
-	if (this->indexesToTrackListToRemove.Num() > 0) {
-		this->lastIndex = this->indexesToTrackListToRemove[0];
-		for (int i = this->indexesToTrackListToRemove.Num() - 1; i > 0; i--) {
-			this->UnclaimedParentList.RemoveAt(this->indexesToTrackListToRemove[i]);
+	if (this->indexesToParentListToRemove.Num() > 0) {
+		this->indexToBeReplaced = this->indexesToParentListToRemove[0];
+		for (int i = this->indexesToParentListToRemove.Num() - 1; i > 0; i--) {
+			this->UnclaimedParentList.RemoveAt(this->indexesToParentListToRemove[i]);
 			//This is where you can rotate around the z axis to create the circle
 			//Spawn horizontal branch connectors
 			//TODO: maybe throw into function
-			int currentIndex = this->indexesToTrackListToRemove[i];
-			numberOfTracksBetween = currentIndex - this->lastIndex;
-			stepDegree =  22.5f / numberOfTracksBetween;
-			float yPos = this->indexesToTrackListToRemove[i] * this->spaceIncrease;
-			FVector conPosition = this->newPosition;
-			conPosition.Y = yPos;
-			conPosition.Z -= this->spaceIncrease / 2;
-			AConnectionActor* conActor = this->CreateConnectionActor(conPosition, numberOfTracksBetween, this->baseRotationForBranchConnection - stepDegree);
-			this->ConnectionArray.Add(conActor);
+			this->SpawnHorizontalBranchConnection(this->indexesToParentListToRemove[i]);
 		}
-		this->UnclaimedParentList[this->lastIndex] = next;
-		this->newPosition.Y = this->lastIndex * this->spaceIncrease;
+		this->UnclaimedParentList[this->indexToBeReplaced] = next;
+		this->newPosition.Y = this->indexToBeReplaced * this->spaceIncrease;
+
 		//Create certain merge connections for cases where current and next has 2 parents and next has branches from it
-		//case: f2a1f615df927fd137dc428e7d6c73a1f128ca40 and 63d1f70bae6c4a775f87b4e5f3f3437c50c6c8dc
 		int index;
 		if (this->UnclaimedParentList.Find(current, index) && current->GetParentTwo() == next->GetSha()) {
-			numberOfTracksBetween = this->lastIndex - index;
-			stepDegree = 22.5f / numberOfTracksBetween;
-			AConnectionActor* conActor = this->CreateConnectionActor(current->GetActorLocation(), numberOfTracksBetween, this->baseRotationForMergeConnection + stepDegree);
+			numberOfTracksBetween = this->indexToBeReplaced - index;
+			stepDegree = this->quarterRotation / numberOfTracksBetween;
+			conActor = this->CreateConnectionActor(current->GetActorLocation(), numberOfTracksBetween, this->baseRotationForMergeConnection + stepDegree);
 			this->ConnectionArray.Add(conActor);
 		}
-	}
-	else {
+	} else {
 		this->newPosition.Y = this->UnclaimedParentList.Num() * spaceIncrease;
 		int index = this->UnclaimedParentList.Add(next);
 		//Creates certain merge connections where no branches are comming from next (e.g. case 1 & 1, 1 & 2 and 2 & 2):
-		if (this->UnclaimedParentList.Find(current, this->lastIndex)) {
-			numberOfTracksBetween = index - this->lastIndex;
-			stepDegree = 22.5f / numberOfTracksBetween;
-			AConnectionActor* conActor = this->CreateConnectionActor(current->GetActorLocation(), numberOfTracksBetween, this->baseRotationForMergeConnection + stepDegree);
+		if (this->UnclaimedParentList.Find(current, this->indexToBeReplaced)) {
+			numberOfTracksBetween = index - this->indexToBeReplaced;
+			stepDegree = this->quarterRotation / numberOfTracksBetween;
+			conActor = this->CreateConnectionActor(current->GetActorLocation(), numberOfTracksBetween, this->baseRotationForMergeConnection + stepDegree);
 			this->ConnectionArray.Add(conActor);
-		}
-		else {
+		} else {
 			UE_LOG(LogTemp, Warning, TEXT("Could not find commit %s"), *current->GetSha());
 		}
 	}
 }
-//TODO pass by reference instead?
+//TODO pass by reference instead
 void ARestActor::UpdateConnections(ACommitActor* current, ACommitActor* next) {
-	if (next->GetSha() == "eea70edae5ad16cf83875bf69c11ea28b9f3e5d8") {
-		UE_LOG(LogTemp, Warning, TEXT("Next's sha is: %s"), *next->GetSha());
-	}
+	AConnectionActor* conActor;
+	FVector position;
 
 	if (this->lastUsedConnectionIndex == this->UnclaimedParentList.Num() - 1) {
 		//Commit was added in existing tracklist entry
 		this->ScaleVerticalConnections(0);
 	} else if (this->lastUsedConnectionIndex < this->UnclaimedParentList.Num() - 1) {
 		this->CreateVerticalConnection(this->newPosition);
-		this->ScaleVerticalConnections(this->lastUsedConnectionIndex+1);
+		this->ScaleVerticalConnections(this->lastUsedConnectionIndex + 1);
 		this->lastUsedConnectionIndex++;
 	} else if (this->lastUsedConnectionIndex > this->UnclaimedParentList.Num() - 1) {
-	//Commit was removed from tracklist
+		//Commit was removed from tracklist
 		bool finished = false;
 		int p = this->UnclaimedConnectionList.Num() - 1;
 		int qIndex;
-		if (this->indexesToTrackListToRemove.Num() > this->UnclaimedConnectionList.Num()) {
+		if (this->indexesToParentListToRemove.Num() > this->UnclaimedConnectionList.Num()) {
 			qIndex = this->UnclaimedConnectionList.Num() - 1;
 		} else {
-			qIndex = this->indexesToTrackListToRemove.Num() - 1;
+			qIndex = this->indexesToParentListToRemove.Num() - 1;
 		}
-		int q = this->indexesToTrackListToRemove[qIndex];
+		int q = this->indexesToParentListToRemove[qIndex];
+		int zScale;
 		while (!finished) {
 			if (qIndex == 0) {
 				finished = true;
-			}
-			else if (p <= q) {
+			} else if (p <= q) {
 				this->UnclaimedConnectionList.RemoveAt(p);
 				p--;
 				qIndex--;
-				q = this->indexesToTrackListToRemove[qIndex];
+				q = this->indexesToParentListToRemove[qIndex];
 			} else {
 				//create horizontal
-				FVector position = current->GetActorLocation();
+				position = current->GetActorLocation();
 				position.Y = p * this->spaceIncrease;
 				position.Z -= this->spaceIncrease / 2;
-				int zScale = qIndex;
-				float stepDegree = 22.5f / qIndex;
-				AConnectionActor* conActor = this->CreateConnectionActor(position, zScale, this->baseRotationForBranchConnection - stepDegree);
+				zScale = qIndex;
+				float stepDegree = this->quarterRotation / qIndex;
+				conActor = this->CreateConnectionActor(position, zScale, this->baseRotationForBranchConnection - stepDegree);
 				this->ConnectionArray.Add(conActor);
 				p--;
 			}
 		}
 
 		int runTo = this->UnclaimedConnectionList.Num();
-		int clearFrom = this->indexesToTrackListToRemove[1];
-
+		int clearFrom = this->indexesToParentListToRemove[1];
 		this->UnclaimedConnectionList.RemoveAt(clearFrom, runTo - clearFrom);
+
 		for (int i = clearFrom; i < runTo; i++) {
-			FVector position = current->GetActorLocation();
+			position = current->GetActorLocation();
 			position.Y = i * this->spaceIncrease;
 			position.Z -= this->spaceIncrease;
-			AConnectionActor* conActor = this->CreateAndReturnVerticalConnection(position);
+			conActor = this->CreateAndReturnVerticalConnection(position);
 			this->UnclaimedConnectionList.Add(conActor);
-
 		}
 
-		this->ScaleVerticalConnections(this->indexesToTrackListToRemove[1]);
+		this->ScaleVerticalConnections(this->indexesToParentListToRemove[1]);
 		this->lastUsedConnectionIndex = this->UnclaimedConnectionList.Num() - 1;
 	} else {
 		this->lastUsedConnectionIndex--;
@@ -262,7 +238,6 @@ void ARestActor::UpdateConnections(ACommitActor* current, ACommitActor* next) {
 	}
 }
 
-//TODO: When finished check if you need to return the connection actors from CreateConnectionActor() functions
 AConnectionActor * ARestActor::CreateConnectionActor(FVector conPosition, int zScale, float degreesToRotate) {
 	AConnectionActor* connectionActor = this->GetWorld()->SpawnActor<AConnectionActor>();
 	connectionActor->SetActorLocation(conPosition);
@@ -271,13 +246,12 @@ AConnectionActor * ARestActor::CreateConnectionActor(FVector conPosition, int zS
 	rotator.Roll += degreesToRotate;
 	connectionActor->SetActorRotation(rotator);
 	connectionActor->SetActorScale3D(FVector(1, 1, zScale));
-
 	return connectionActor;
 }
 
 void ARestActor::CreateVerticalConnection(FVector position) {
 	AConnectionActor* conActor = this->GetWorld()->SpawnActor<AConnectionActor>();
-	position.Z += this->spaceIncrease/2;
+	position.Z += this->spaceIncrease / 2;
 	conActor->SetActorLocation(position);
 	FRotator rotator = conActor->GetActorRotation();
 	rotator.Roll += this->baseRotationForVerticalConnection;
@@ -322,4 +296,14 @@ void ARestActor::ScaleVerticalConnections(int scaleToIndex) {
 			connection->SetActorScale3D(scale);
 		}
 	}
+}
+
+void ARestActor::SpawnHorizontalBranchConnection(int currentIndex) {
+	int numberOfTracksBetween = currentIndex - this->indexToBeReplaced;
+	float stepDegree = this->quarterRotation / numberOfTracksBetween;
+	FVector conPosition = this->newPosition;
+	conPosition.Y = currentIndex * this->spaceIncrease;
+	conPosition.Z -= this->spaceIncrease / 2;
+	AConnectionActor* conActor = this->CreateConnectionActor(conPosition, numberOfTracksBetween, this->baseRotationForBranchConnection - stepDegree);
+	this->ConnectionArray.Add(conActor);
 }

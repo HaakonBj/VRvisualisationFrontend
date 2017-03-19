@@ -19,32 +19,30 @@ public:
 	ACommitActor();
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	void Init(FArr data);
-	// Called when the game starts
-	virtual void BeginPlay() override;	
-	// Called every frame
+	virtual void BeginPlay() override;
 	virtual void Tick( float DeltaSeconds) override;
 	UFUNCTION(BlueprintPure, Category = "Rest")
 	int GetId();
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	void SetId(int newId);
 	UFUNCTION(BlueprintPure, Category = "Rest")
-	FString GetAuthor();
+	FString GetAuthor() const;
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	void SetAuthor(FString newAuthor);
 	UFUNCTION(BlueprintPure, Category = "Rest")
-	FString GetSha();
+	FString GetSha() const;
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	void SetSha(FString newSha);
 	UFUNCTION(BlueprintPure, Category = "Rest")
-	FString GetParentOne();
+	FString GetParentOne() const;
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	void SetParentOne(FString newParentOneSha);
 	UFUNCTION(BlueprintPure, Category = "Rest")
-	FString GetParentTwo();
+	FString GetParentTwo() const;
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	void SetParentTwo(FString newParentTwoSha);
 	UFUNCTION(BlueprintPure, Category = "Rest")
-	FString GetDate();
+	FString GetDate() const;
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	void SetDate(FString newDate);
 
