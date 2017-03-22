@@ -228,6 +228,7 @@ void ARestActor::UpdateConnections(ACommitActor* current, ACommitActor* next) {
 			position.Z -= this->spaceIncrease;
 			conActor = this->CreateAndReturnVerticalConnection(position);
 			this->UnclaimedConnectionList.Add(conActor);
+			this->ConnectionArray.Add(conActor);
 		}
 
 		this->ScaleVerticalConnections(this->indexesToParentListToRemove[1]);
@@ -261,9 +262,6 @@ void ARestActor::CreateVerticalConnection(FVector position) {
 	conActor->SetActorScale3D(scale);
 	this->UnclaimedConnectionList.Add(conActor);
 	this->ConnectionArray.Add(conActor);
-	if (conActor->GetActorLabel() == "ConnectionActor76") {
-		UE_LOG(LogTemp, Warning, TEXT("Current's sha is"));
-	}
 }
 
 AConnectionActor* ARestActor::CreateAndReturnVerticalConnection(FVector position) {
@@ -275,9 +273,6 @@ AConnectionActor* ARestActor::CreateAndReturnVerticalConnection(FVector position
 	FVector scale = conActor->GetActorScale();
 	scale.Z = scale.Z / 2.0f;
 	conActor->SetActorScale3D(scale);
-	if (conActor->GetActorLabel() == "ConnectionActor76") {
-		UE_LOG(LogTemp, Warning, TEXT("Current's sha is"));
-	}
 	return conActor;
 }
 
