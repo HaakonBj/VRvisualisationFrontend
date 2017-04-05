@@ -64,6 +64,16 @@ Saved/Config/Windows/*
 
 Content/*
 !Content/Blueprints
+!Content/Geometry/
+Content/Geometry/*
+!Content/Geometry/Meshes
+Content/Geometry/Meshes/*
+!Content/Geometry/Meshes/level_0_fbm
+!Content/Geometry/Meshes/level_0_fbm/*
+!Content/Geometry/Meshes/Keys_Key1.uasset
+!Content/Geometry/Meshes/Lever_Body.uasset
+!Content/Geometry/Meshes/Lever_Handle.uasset
+
 !Content/StarterContent
 Content/StarterContent/*
 !Content/StarterContent/Shapes

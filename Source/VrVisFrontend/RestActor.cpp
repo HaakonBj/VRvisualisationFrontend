@@ -263,9 +263,6 @@ void ARestActor::CreateVerticalConnection(FVector position) {
 	this->CheckIfToSetActorHidden(conActor);
 	this->UnclaimedConnectionList.Add(conActor);
 	this->ConnectionArray.Add(conActor);
-	if (conActor->GetActorLabel() == "ConnectionActor76") {
-		UE_LOG(LogTemp, Warning, TEXT("Current's sha is"));
-	}
 }
 
 AConnectionActor* ARestActor::CreateAndReturnVerticalConnection(FVector position) {
@@ -277,9 +274,6 @@ AConnectionActor* ARestActor::CreateAndReturnVerticalConnection(FVector position
 	FVector scale = conActor->GetActorScale();
 	scale.Z = scale.Z / 2.0f;
 	conActor->SetActorScale3D(scale);
-	if (conActor->GetActorLabel() == "ConnectionActor76") {
-		UE_LOG(LogTemp, Warning, TEXT("Current's sha is"));
-	}
 	this->CheckIfToSetActorHidden(conActor);
 	return conActor;
 }
