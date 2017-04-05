@@ -228,6 +228,7 @@ void ARestActor::UpdateConnections(ACommitActor* current, ACommitActor* next) {
 			position.Z -= this->spaceIncrease;
 			conActor = this->CreateAndReturnVerticalConnection(position);
 			this->UnclaimedConnectionList.Add(conActor);
+			this->ConnectionArray.Add(conActor);
 		}
 
 		this->ScaleVerticalConnections(this->indexesToParentListToRemove[1]);
