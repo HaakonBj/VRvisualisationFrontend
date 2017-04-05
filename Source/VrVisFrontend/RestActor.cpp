@@ -239,14 +239,15 @@ void ARestActor::UpdateConnections(ACommitActor* current, ACommitActor* next) {
 }
 
 AConnectionActor * ARestActor::CreateConnectionActor(FVector conPosition, int zScale, float degreesToRotate) {
-	AConnectionActor* connectionActor = this->GetWorld()->SpawnActor<AConnectionActor>();
-	connectionActor->SetActorLocation(conPosition);
-	connectionActor->setHorizontal();
-	FRotator rotator = connectionActor->GetActorRotation();
+	AConnectionActor* conActor = this->GetWorld()->SpawnActor<AConnectionActor>();
+	conActor->SetActorLocation(conPosition);
+	conActor->setHorizontal();
+	FRotator rotator = conActor->GetActorRotation();
 	rotator.Roll += degreesToRotate;
-	connectionActor->SetActorRotation(rotator);
-	connectionActor->SetActorScale3D(FVector(1, 1, zScale));
-	return connectionActor;
+	conActor->SetActorRotation(rotator);
+	conActor->SetActorScale3D(FVector(1, 1, zScale));
+	this->CheckIfToSetActorHidden(conActor);
+	return conActor;
 }
 
 void ARestActor::CreateVerticalConnection(FVector position) {
@@ -259,6 +260,7 @@ void ARestActor::CreateVerticalConnection(FVector position) {
 	FVector scale = conActor->GetActorScale();
 	scale.Z = scale.Z;
 	conActor->SetActorScale3D(scale);
+	this->CheckIfToSetActorHidden(conActor);
 	this->UnclaimedConnectionList.Add(conActor);
 	this->ConnectionArray.Add(conActor);
 	if (conActor->GetActorLabel() == "ConnectionActor76") {
@@ -278,6 +280,7 @@ AConnectionActor* ARestActor::CreateAndReturnVerticalConnection(FVector position
 	if (conActor->GetActorLabel() == "ConnectionActor76") {
 		UE_LOG(LogTemp, Warning, TEXT("Current's sha is"));
 	}
+	this->CheckIfToSetActorHidden(conActor);
 	return conActor;
 }
 
@@ -305,5 +308,20 @@ void ARestActor::SpawnHorizontalBranchConnection(int currentIndex) {
 	conPosition.Y = currentIndex * this->spaceIncrease;
 	conPosition.Z -= this->spaceIncrease / 2;
 	AConnectionActor* conActor = this->CreateConnectionActor(conPosition, numberOfTracksBetween, this->baseRotationForBranchConnection - stepDegree);
+	this->CheckIfToSetActorHidden(conActor);
 	this->ConnectionArray.Add(conActor);
+}
+
+void ARestActor::SetFloorActorReference(AStaticMeshActor* floorMesh) {
+	this->floor = floorMesh;
+}
+
+void ARestActor::CheckIfToSetActorHidden(AActor * actorToBeHidden) {
+	bool hidden;
+	if (actorToBeHidden->GetActorLocation().Z < this->floor->GetActorLocation().Z) {
+		hidden = true;
+	} else {
+		hidden = false;
+	}
+	actorToBeHidden->SetActorHiddenInGame(hidden);
 }

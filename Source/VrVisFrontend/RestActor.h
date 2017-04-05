@@ -21,6 +21,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category ="Rest")
 	ASqlConnect* database;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
+	AStaticMeshActor* floor;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	TArray<ACommitActor*> CommitArray;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	TArray<ACommitActor*> UnclaimedParentList;
@@ -56,5 +58,9 @@ public:
 	AConnectionActor * CreateAndReturnVerticalConnection(FVector position);
 	void ScaleVerticalConnections(int scaleToIndex);
 	void SpawnHorizontalBranchConnection(int currentIndex);
+	UFUNCTION(BlueprintCallable, Category = "Rest")
+	void SetFloorActorReference(AStaticMeshActor* floorMesh);
+	UFUNCTION(BlueprintCallable, Category = "Rest")
+	void CheckIfToSetActorHidden(AActor * actorToBeHidden);
 	~ARestActor();
 };
