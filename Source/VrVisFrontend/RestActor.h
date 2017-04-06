@@ -7,6 +7,7 @@
 #include "SqlConnect.h"
 #include "CommitActor.h"
 #include "ConnectionActor.h"
+#include "Runtime/Engine/Classes/Kismet/KismetMathLibrary.h"
 #include "RestActor.generated.h"
 
 UCLASS()
@@ -67,7 +68,8 @@ public:
 	void CreateVerticalConnection(FVector position);
 	AConnectionActor * CreateAndReturnVerticalConnection(FVector position);
 	void ScaleVerticalConnections(int scaleToIndex);
-	void SpawnHorizontalBranchConnection(int currentIndex);
+	void SpawnHorizontalBranchConnection(FVector parentPosition);
+	//void SpawnHorizontalBranchConnection(int currentIndex);
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	void SetFloorActorReference(AStaticMeshActor* floorMesh);
 	UFUNCTION(BlueprintCallable, Category = "Rest")

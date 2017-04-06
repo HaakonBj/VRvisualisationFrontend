@@ -190,16 +190,18 @@ void ARestActor::UpdatePosition(ACommitActor* current, ACommitActor* next) {
 
 	if (this->indexesToParentListToRemove.Num() > 0) {
 		this->indexToBeReplaced = this->indexesToParentListToRemove[0];
-		for (int i = this->indexesToParentListToRemove.Num() - 1; i > 0; i--) {
-			this->UnclaimedParentList.RemoveAt(this->indexesToParentListToRemove[i]);
-			//This is where you can rotate around the z axis to create the circle
-			//Spawn horizontal branch connectors
-		//	this->SpawnHorizontalBranchConnection(this->indexesToParentListToRemove[i]);
-		}
-		this->UnclaimedParentList[this->indexToBeReplaced] = next;
+		
 		float test = this->indexToBeReplaced * this->rotationAmount;
 		this->newPosition.Y = sin(test) * this->spaceIncrease;
-		this->newPosition.X = cos(test) * this->spaceIncrease;
+		this->newPosition.X = cos(test) * this->spaceIncrease;		
+		for (int i = this->indexesToParentListToRemove.Num() - 1; i > 0; i--) {
+			this->SpawnHorizontalBranchConnection(this->UnclaimedParentList[this->indexesToParentListToRemove[i]]->GetActorLocation());
+			this->UnclaimedParentList.RemoveAt(this->indexesToParentListToRemove[i]);
+			//Spawn horizontal branch connectors
+			//this->SpawnHorizontalBranchConnection(this->indexesToParentListToRemove[i]);
+		}
+		this->UnclaimedParentList[this->indexToBeReplaced] = next;
+
 		//Create certain merge connections for cases where current and next has 2 parents and next has branches from it
 		/*int index;
 		if (this->UnclaimedParentList.Find(current, index) && current->GetParentTwo() == next->GetSha()) {
@@ -347,16 +349,34 @@ void ARestActor::ScaleVerticalConnections(int scaleToIndex) {
 	}
 }
 
-void ARestActor::SpawnHorizontalBranchConnection(int currentIndex) {
-	int numberOfTracksBetween = currentIndex - this->indexToBeReplaced;
-	float stepDegree = this->quarterRotation / numberOfTracksBetween;
+void ARestActor::SpawnHorizontalBranchConnection(FVector parentPosition) {
+	AConnectionActor* conActor = this->GetWorld()->SpawnActor<AConnectionActor>();
+	FVector Orgin;
+	FVector BoundsExtent;
+	GetActorBounds(false, Orgin, BoundsExtent);
 	FVector conPosition = this->newPosition;
-	conPosition.Y = currentIndex * this->spaceIncrease;
-	conPosition.Z -= this->spaceIncrease / 2;
-	AConnectionActor* conActor = this->CreateConnectionActor(conPosition, numberOfTracksBetween, this->baseRotationForBranchConnection - stepDegree);
-//	this->CheckIfToSetActorHidden(conActor);
-	this->ConnectionArray.Add(conActor);
+	conActor->SetActorLocation(conPosition);
+	FVector vectorBetween = parentPosition - conPosition;
+	float distanceBetween = vectorBetween.Size();
+	FRotator rotator = UKismetMathLibrary::MakeRotFromY(vectorBetween);
+	conActor->SetActorRotation(rotator);
+	conActor->setHorizontal();
+	conActor->SetActorScale3D(FVector(1, 1, distanceBetween/15));
+	//	this->CheckIfToSetActorHidden(conActor);
+
+
 }
+
+//void ARestActor::SpawnHorizontalBranchConnection(int currentIndex) {
+//	int numberOfTracksBetween = currentIndex - this->indexToBeReplaced;
+//	float stepDegree = this->quarterRotation / numberOfTracksBetween;
+//	FVector conPosition = this->newPosition;
+//	conPosition.Y = currentIndex * this->spaceIncrease;
+//	conPosition.Z -= this->spaceIncrease / 2;
+//	AConnectionActor* conActor = this->CreateConnectionActor(conPosition, numberOfTracksBetween, this->baseRotationForBranchConnection - stepDegree);
+////	this->CheckIfToSetActorHidden(conActor);
+//	this->ConnectionArray.Add(conActor);
+//}
 
 void ARestActor::SetFloorActorReference(AStaticMeshActor* floorMesh) {
 	this->floor = floorMesh;
