@@ -35,11 +35,13 @@ public:
 	TArray<int> indexesToParentListToRemove;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	FVector newPosition;
-	const int spaceIncrease = 15;
+	const int spaceIncrease = 60;
 	const int baseRotationForBranchConnection = -90;
 	const int baseRotationForMergeConnection = 90;
 	const int baseRotationForVerticalConnection = 180;
 	const float quarterRotation = 22.5f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
+	float rotationAmount;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	int maxAmountOfTracksCounter = 0;
 	int currentTrackCounter = 0;
@@ -54,6 +56,8 @@ public:
 	void InitRestActor();
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	void FindMaxAmountOfTracks(ACommitActor* current, ACommitActor* next);
+	UFUNCTION(BlueprintCallable, Category = "Rest")
+	void SetRotationAmount();
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	FVector FindPosition(ACommitActor* current, ACommitActor* next);
 	void UpdatePosition(ACommitActor* current, ACommitActor* next);

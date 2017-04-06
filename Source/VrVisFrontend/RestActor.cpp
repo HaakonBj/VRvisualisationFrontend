@@ -125,10 +125,15 @@ void ARestActor::FindMaxAmountOfTracks(ACommitActor* current, ACommitActor* next
 	}
 }
 
+void ARestActor::SetRotationAmount() {
+	this->rotationAmount = 360 / this->maxAmountOfTracksCounter;
+}
+
+
 FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
 	this->indexesToParentListToRemove.Empty();
-	float numberOfTracksBetween;
-	float stepDegree;
+	//float numberOfTracksBetween;
+	//float stepDegree;
 	int index = 0;
 
 	//Case where current has 2 parents and next has 1
@@ -138,41 +143,45 @@ FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
 		for (int i = 0; i < this->UnclaimedParentList.Num(); i++) {
 			if (next->GetSha() == this->UnclaimedParentList[i]->GetParentOne()) {
 				this->UnclaimedParentList[i] = next;
-				this->newPosition.Y = i * this->spaceIncrease;
+				float test = i * this->rotationAmount;
+				this->newPosition.Y = sin(test) *  this->spaceIncrease;
+				this->newPosition.X = cos(test) * this->spaceIncrease;
 				hasParent = true;
 				index = i;
 			}
 		}
 		//Handles the case where the next commit is NOT a parent of an existing commit:
 		if (!hasParent) {
-			this->newPosition.Y = this->UnclaimedParentList.Num() * this->spaceIncrease;
+			float test = this->UnclaimedParentList.Num() * this->rotationAmount;
+			this->newPosition.Y = sin(test) * this->spaceIncrease;
+			this->newPosition.X = cos(test) * this->spaceIncrease;
 			index = this->UnclaimedParentList.Add(next);
 		}
 		//is this check not the same as hasParent? Can I just use hasParent?
-		if (this->UnclaimedParentList.Find(current, this->indexToBeReplaced)) {
+		/*if (this->UnclaimedParentList.Find(current, this->indexToBeReplaced)) {
 			numberOfTracksBetween = index - this->indexToBeReplaced;
 			stepDegree = this->quarterRotation / numberOfTracksBetween;
 			AConnectionActor* conActor = this->CreateConnectionActor(current->GetActorLocation(), numberOfTracksBetween, this->baseRotationForMergeConnection + stepDegree);
 			this->ConnectionArray.Add(conActor);
 		} else {
 			UE_LOG(LogTemp, Warning, TEXT("Could not find commit %s"), *current->GetSha());
-		}
+		}*/
 	} else {
 		this->UpdatePosition(current, next);
 	}
 	//Always decrease the z direction (down)
 	this->newPosition.Z -= this->spaceIncrease;
-	this->UpdateConnections(current, next);
+//	this->UpdateConnections(current, next);
 	return this->newPosition;
 }
 
 //Handles the position update for most parent cases when positioning.
 //See RestActor::FindPosition for the only case that does not work with this
 void ARestActor::UpdatePosition(ACommitActor* current, ACommitActor* next) {
-	int numberOfTracksBetween;
+	/*int numberOfTracksBetween;
 	float stepDegree;
 	AConnectionActor* conActor;
-
+*/
 	for (int i = 0; i < this->UnclaimedParentList.Num(); i++) {
 		if (next->GetSha() == this->UnclaimedParentList[i]->GetParentOne()) {
 			this->indexesToParentListToRemove.Add(i);
@@ -185,31 +194,34 @@ void ARestActor::UpdatePosition(ACommitActor* current, ACommitActor* next) {
 			this->UnclaimedParentList.RemoveAt(this->indexesToParentListToRemove[i]);
 			//This is where you can rotate around the z axis to create the circle
 			//Spawn horizontal branch connectors
-			this->SpawnHorizontalBranchConnection(this->indexesToParentListToRemove[i]);
+		//	this->SpawnHorizontalBranchConnection(this->indexesToParentListToRemove[i]);
 		}
 		this->UnclaimedParentList[this->indexToBeReplaced] = next;
-		this->newPosition.Y = this->indexToBeReplaced * this->spaceIncrease;
-
+		float test = this->indexToBeReplaced * this->rotationAmount;
+		this->newPosition.Y = sin(test) * this->spaceIncrease;
+		this->newPosition.X = cos(test) * this->spaceIncrease;
 		//Create certain merge connections for cases where current and next has 2 parents and next has branches from it
-		int index;
+		/*int index;
 		if (this->UnclaimedParentList.Find(current, index) && current->GetParentTwo() == next->GetSha()) {
 			numberOfTracksBetween = this->indexToBeReplaced - index;
 			stepDegree = this->quarterRotation / numberOfTracksBetween;
 			conActor = this->CreateConnectionActor(current->GetActorLocation(), numberOfTracksBetween, this->baseRotationForMergeConnection + stepDegree);
 			this->ConnectionArray.Add(conActor);
-		}
+		}*/
 	} else {
-		this->newPosition.Y = this->UnclaimedParentList.Num() * spaceIncrease;
+		float test = this->UnclaimedParentList.Num() * this->rotationAmount;
+		this->newPosition.Y = sin(test) * this->spaceIncrease;
+		this->newPosition.X = cos(test) * this->spaceIncrease;
 		int index = this->UnclaimedParentList.Add(next);
 		//Creates certain merge connections where no branches are comming from next (e.g. case 1 & 1, 1 & 2 and 2 & 2):
-		if (this->UnclaimedParentList.Find(current, this->indexToBeReplaced)) {
+		/*if (this->UnclaimedParentList.Find(current, this->indexToBeReplaced)) {
 			numberOfTracksBetween = index - this->indexToBeReplaced;
 			stepDegree = this->quarterRotation / numberOfTracksBetween;
 			conActor = this->CreateConnectionActor(current->GetActorLocation(), numberOfTracksBetween, this->baseRotationForMergeConnection + stepDegree);
 			this->ConnectionArray.Add(conActor);
 		} else {
 			UE_LOG(LogTemp, Warning, TEXT("Could not find commit %s"), *current->GetSha());
-		}
+		}*/
 	}
 }
 //TODO pass by reference instead
