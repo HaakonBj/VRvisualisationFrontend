@@ -86,6 +86,45 @@ void ARestActor::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Re
 	}
 }
 
+void ARestActor::FindMaxAmountOfTracks(ACommitActor* current, ACommitActor* next) {
+	this->indexesToParentListToRemove.Empty();
+	if (current->GetParentTwo() != "NULL" && next->GetParentTwo() == "NULL") {
+		bool hasParent = false;
+		for (int i = 0; i < this->UnclaimedParentList.Num(); i++) {
+			if (next->GetSha() == this->UnclaimedParentList[i]->GetParentOne()) {
+				this->UnclaimedParentList[i] = next;
+				hasParent = true;
+			}
+		}
+		if (!hasParent) {
+			this->UnclaimedParentList.Add(next);
+			this->currentTrackCounter++;
+		}
+	} else {
+		for (int i = 0; i < this->UnclaimedParentList.Num(); i++) {
+			if (next->GetSha() == this->UnclaimedParentList[i]->GetParentOne()) {
+				this->indexesToParentListToRemove.Add(i);
+			}
+		}
+
+		if (this->indexesToParentListToRemove.Num() > 0) {
+			this->indexToBeReplaced = this->indexesToParentListToRemove[0];
+			for (int i = this->indexesToParentListToRemove.Num() - 1; i > 0; i--) {
+				this->UnclaimedParentList.RemoveAt(this->indexesToParentListToRemove[i]);
+				this->currentTrackCounter--;
+			}
+			this->UnclaimedParentList[this->indexToBeReplaced] = next;
+		}
+		else {
+			this->UnclaimedParentList.Add(next);
+			this->currentTrackCounter++;
+		}
+	}
+	if (this->currentTrackCounter > this->maxAmountOfTracksCounter) {
+		this->maxAmountOfTracksCounter = this->currentTrackCounter;
+	}
+}
+
 FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
 	this->indexesToParentListToRemove.Empty();
 	float numberOfTracksBetween;
@@ -109,6 +148,7 @@ FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
 			this->newPosition.Y = this->UnclaimedParentList.Num() * this->spaceIncrease;
 			index = this->UnclaimedParentList.Add(next);
 		}
+		//is this check not the same as hasParent? Can I just use hasParent?
 		if (this->UnclaimedParentList.Find(current, this->indexToBeReplaced)) {
 			numberOfTracksBetween = index - this->indexToBeReplaced;
 			stepDegree = this->quarterRotation / numberOfTracksBetween;
@@ -145,7 +185,6 @@ void ARestActor::UpdatePosition(ACommitActor* current, ACommitActor* next) {
 			this->UnclaimedParentList.RemoveAt(this->indexesToParentListToRemove[i]);
 			//This is where you can rotate around the z axis to create the circle
 			//Spawn horizontal branch connectors
-			//TODO: maybe throw into function
 			this->SpawnHorizontalBranchConnection(this->indexesToParentListToRemove[i]);
 		}
 		this->UnclaimedParentList[this->indexToBeReplaced] = next;
@@ -247,7 +286,7 @@ AConnectionActor * ARestActor::CreateConnectionActor(FVector conPosition, int zS
 	rotator.Roll += degreesToRotate;
 	conActor->SetActorRotation(rotator);
 	conActor->SetActorScale3D(FVector(1, 1, zScale));
-	this->CheckIfToSetActorHidden(conActor);
+//	this->CheckIfToSetActorHidden(conActor);
 	return conActor;
 }
 
@@ -261,7 +300,7 @@ void ARestActor::CreateVerticalConnection(FVector position) {
 	FVector scale = conActor->GetActorScale();
 	scale.Z = scale.Z;
 	conActor->SetActorScale3D(scale);
-	this->CheckIfToSetActorHidden(conActor);
+//	this->CheckIfToSetActorHidden(conActor);
 	this->UnclaimedConnectionList.Add(conActor);
 	this->ConnectionArray.Add(conActor);
 }
@@ -275,7 +314,7 @@ AConnectionActor* ARestActor::CreateAndReturnVerticalConnection(FVector position
 	FVector scale = conActor->GetActorScale();
 	scale.Z = scale.Z / 2.0f;
 	conActor->SetActorScale3D(scale);
-	this->CheckIfToSetActorHidden(conActor);
+//	this->CheckIfToSetActorHidden(conActor);
 	return conActor;
 }
 
@@ -303,7 +342,7 @@ void ARestActor::SpawnHorizontalBranchConnection(int currentIndex) {
 	conPosition.Y = currentIndex * this->spaceIncrease;
 	conPosition.Z -= this->spaceIncrease / 2;
 	AConnectionActor* conActor = this->CreateConnectionActor(conPosition, numberOfTracksBetween, this->baseRotationForBranchConnection - stepDegree);
-	this->CheckIfToSetActorHidden(conActor);
+//	this->CheckIfToSetActorHidden(conActor);
 	this->ConnectionArray.Add(conActor);
 }
 

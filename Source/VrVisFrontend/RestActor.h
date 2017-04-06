@@ -32,13 +32,17 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	TArray<AConnectionActor*> UnclaimedConnectionList;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
+	TArray<int> indexesToParentListToRemove;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	FVector newPosition;
 	const int spaceIncrease = 15;
 	const int baseRotationForBranchConnection = -90;
 	const int baseRotationForMergeConnection = 90;
 	const int baseRotationForVerticalConnection = 180;
 	const float quarterRotation = 22.5f;
-	TArray<int> indexesToParentListToRemove;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
+	int maxAmountOfTracksCounter = 0;
+	int currentTrackCounter = 0;
 	int indexToBeReplaced;
 	int lastUsedConnectionIndex;
 	ARestActor();
@@ -48,6 +52,8 @@ public:
 	void OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	void InitRestActor();
+	UFUNCTION(BlueprintCallable, Category = "Rest")
+	void FindMaxAmountOfTracks(ACommitActor* current, ACommitActor* next);
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	FVector FindPosition(ACommitActor* current, ACommitActor* next);
 	void UpdatePosition(ACommitActor* current, ACommitActor* next);
