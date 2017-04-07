@@ -126,7 +126,7 @@ void ARestActor::FindMaxAmountOfTracks(ACommitActor* current, ACommitActor* next
 }
 
 void ARestActor::SetRotationAmount() {
-	this->rotationAmount = 360 / this->maxAmountOfTracksCounter;
+	this->rotationAmount = 360 / (this->maxAmountOfTracksCounter +1);
 }
 
 
@@ -143,18 +143,20 @@ FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
 		for (int i = 0; i < this->UnclaimedParentList.Num(); i++) {
 			if (next->GetSha() == this->UnclaimedParentList[i]->GetParentOne()) {
 				this->UnclaimedParentList[i] = next;
-				float test = i * this->rotationAmount;
-				this->newPosition.Y = sin(test) *  this->spaceIncrease;
-				this->newPosition.X = cos(test) * this->spaceIncrease;
+				float angle = i * this->rotationAmount;
+				float radian = UKismetMathLibrary::DegreesToRadians(angle);
+				this->newPosition.Y = sin(radian) * this->spaceIncrease;
+				this->newPosition.X = cos(radian) * this->spaceIncrease;
 				hasParent = true;
 				index = i;
 			}
 		}
 		//Handles the case where the next commit is NOT a parent of an existing commit:
 		if (!hasParent) {
-			float test = this->UnclaimedParentList.Num() * this->rotationAmount;
-			this->newPosition.Y = sin(test) * this->spaceIncrease;
-			this->newPosition.X = cos(test) * this->spaceIncrease;
+			float angle = this->UnclaimedParentList.Num() * this->rotationAmount;
+			float radian = UKismetMathLibrary::DegreesToRadians(angle);
+			this->newPosition.Y = sin(radian) * this->spaceIncrease;
+			this->newPosition.X = cos(radian) * this->spaceIncrease;
 			index = this->UnclaimedParentList.Add(next);
 		}
 		//is this check not the same as hasParent? Can I just use hasParent?
@@ -191,17 +193,16 @@ void ARestActor::UpdatePosition(ACommitActor* current, ACommitActor* next) {
 	if (this->indexesToParentListToRemove.Num() > 0) {
 		this->indexToBeReplaced = this->indexesToParentListToRemove[0];
 		
-		float test = this->indexToBeReplaced * this->rotationAmount;
-		this->newPosition.Y = sin(test) * this->spaceIncrease;
-		this->newPosition.X = cos(test) * this->spaceIncrease;		
+		float angle = this->indexToBeReplaced * this->rotationAmount;
+		float radian = UKismetMathLibrary::DegreesToRadians(angle);
+		this->newPosition.Y = sin(radian) * this->spaceIncrease;
+		this->newPosition.X = cos(radian) * this->spaceIncrease;
 		for (int i = this->indexesToParentListToRemove.Num() - 1; i > 0; i--) {
-			this->SpawnHorizontalBranchConnection(this->UnclaimedParentList[this->indexesToParentListToRemove[i]]->GetActorLocation());
-			this->UnclaimedParentList.RemoveAt(this->indexesToParentListToRemove[i]);
 			//Spawn horizontal branch connectors
-			//this->SpawnHorizontalBranchConnection(this->indexesToParentListToRemove[i]);
+			this->SpawnHorizontalBranchConnection(this->indexesToParentListToRemove[i]);
+			this->UnclaimedParentList.RemoveAt(this->indexesToParentListToRemove[i]);
 		}
 		this->UnclaimedParentList[this->indexToBeReplaced] = next;
-
 		//Create certain merge connections for cases where current and next has 2 parents and next has branches from it
 		/*int index;
 		if (this->UnclaimedParentList.Find(current, index) && current->GetParentTwo() == next->GetSha()) {
@@ -211,9 +212,10 @@ void ARestActor::UpdatePosition(ACommitActor* current, ACommitActor* next) {
 			this->ConnectionArray.Add(conActor);
 		}*/
 	} else {
-		float test = this->UnclaimedParentList.Num() * this->rotationAmount;
-		this->newPosition.Y = sin(test) * this->spaceIncrease;
-		this->newPosition.X = cos(test) * this->spaceIncrease;
+		float angle = this->UnclaimedParentList.Num() * this->rotationAmount;
+		float radian = UKismetMathLibrary::DegreesToRadians(angle);
+		this->newPosition.Y = sin(radian) * this->spaceIncrease;
+		this->newPosition.X = cos(radian) * this->spaceIncrease;
 		int index = this->UnclaimedParentList.Add(next);
 		//Creates certain merge connections where no branches are comming from next (e.g. case 1 & 1, 1 & 2 and 2 & 2):
 		/*if (this->UnclaimedParentList.Find(current, this->indexToBeReplaced)) {
@@ -233,10 +235,10 @@ void ARestActor::UpdateConnections(ACommitActor* current, ACommitActor* next) {
 
 	if (this->lastUsedConnectionIndex == this->UnclaimedParentList.Num() - 1) {
 		//Commit was added in existing tracklist entry
-		this->ScaleVerticalConnections(0);
+		//this->ScaleVerticalConnections(0);
 	} else if (this->lastUsedConnectionIndex < this->UnclaimedParentList.Num() - 1) {
 		this->CreateVerticalConnection(this->newPosition);
-		this->ScaleVerticalConnections(this->lastUsedConnectionIndex + 1);
+		//this->ScaleVerticalConnections(this->lastUsedConnectionIndex + 1);
 		this->lastUsedConnectionIndex++;
 	} else if (this->lastUsedConnectionIndex > this->UnclaimedParentList.Num() - 1) {
 		//Commit was removed from tracklist
@@ -283,12 +285,11 @@ void ARestActor::UpdateConnections(ACommitActor* current, ACommitActor* next) {
 			this->UnclaimedConnectionList.Add(conActor);
 			this->ConnectionArray.Add(conActor);
 		}
-
-		this->ScaleVerticalConnections(this->indexesToParentListToRemove[1]);
+		//this->ScaleVerticalConnections(this->indexesToParentListToRemove[1]);
 		this->lastUsedConnectionIndex = this->UnclaimedConnectionList.Num() - 1;
 	} else {
 		this->lastUsedConnectionIndex--;
-		this->ScaleVerticalConnections(0);
+		//this->ScaleVerticalConnections(0);
 	}
 }
 
@@ -349,23 +350,40 @@ void ARestActor::ScaleVerticalConnections(int scaleToIndex) {
 	}
 }
 
-void ARestActor::SpawnHorizontalBranchConnection(FVector parentPosition) {
+//void ARestActor::SpawnHorizontalBranchConnection(FVector parentPosition) {
+//	AConnectionActor* conActor = this->GetWorld()->SpawnActor<AConnectionActor>();
+//	FVector conPosition = this->newPosition;
+//	conPosition.Z -= this->spaceIncrease;
+//	conActor->SetActorLocation(conPosition);
+//	FVector vectorBetween = parentPosition - conPosition;
+//	float distanceBetween = vectorBetween.Size();
+//	FRotator rotator = UKismetMathLibrary::MakeRotFromZ(vectorBetween);
+//	conActor->SetActorRotation(rotator);
+//	conActor->setHorizontal();
+//	conActor->SetActorScale3D(FVector(1, 1, distanceBetween));
+//	//	this->CheckIfToSetActorHidden(conActor);
+//}
+
+void ARestActor::SpawnHorizontalBranchConnection(int currentIndex) {
 	AConnectionActor* conActor = this->GetWorld()->SpawnActor<AConnectionActor>();
-	FVector Orgin;
-	FVector BoundsExtent;
-	GetActorBounds(false, Orgin, BoundsExtent);
+	FVector commitPosition;
+	float angle = currentIndex * this->rotationAmount;
+	float radian = UKismetMathLibrary::DegreesToRadians(angle);
+	commitPosition.Y = sin(radian) * this->spaceIncrease;
+	commitPosition.X = cos(radian) * this->spaceIncrease;
+	commitPosition.Z = this->newPosition.Z;
 	FVector conPosition = this->newPosition;
-	conActor->SetActorLocation(conPosition);
-	FVector vectorBetween = parentPosition - conPosition;
-	float distanceBetween = vectorBetween.Size();
-	FRotator rotator = UKismetMathLibrary::MakeRotFromY(vectorBetween);
-	conActor->SetActorRotation(rotator);
-	conActor->setHorizontal();
-	conActor->SetActorScale3D(FVector(1, 1, distanceBetween/15));
+	conPosition.Z -= this->spaceIncrease/* / 2*/;
 	//	this->CheckIfToSetActorHidden(conActor);
-
-
+	FVector vectorBetween = commitPosition - conPosition;
+	float distanceBetween = vectorBetween.Size();
+	FRotator rotator = UKismetMathLibrary::MakeRotFromZ(vectorBetween);
+	conActor->SetActorLocation(conPosition);
+	conActor->SetActorRotation(rotator);
+	conActor->SetActorScale3D(FVector(1, 1, distanceBetween));
+	this->ConnectionArray.Add(conActor);
 }
+
 
 //void ARestActor::SpawnHorizontalBranchConnection(int currentIndex) {
 //	int numberOfTracksBetween = currentIndex - this->indexToBeReplaced;

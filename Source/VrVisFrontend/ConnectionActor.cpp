@@ -11,11 +11,11 @@ AConnectionActor::AConnectionActor() {
 	PrimaryActorTick.bCanEverTick = true;
 	this->cylinderVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ConnectionVisualRep"));
 	this->cylinderVisual->SetupAttachment(rootSceneComponent);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> CylinderVisualAsset(TEXT("/Game/StarterContent/Shapes/Shape_Cylinder.Shape_Cylinder"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> CylinderVisualAsset(TEXT("/Game/Geometry/Meshes/CylinderFix"));
 	if (CylinderVisualAsset.Succeeded()) {
 		cylinderVisual->SetStaticMesh(CylinderVisualAsset.Object);
 		cylinderVisual->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
-		cylinderVisual->SetWorldScale3D(FVector(0.02373, 1.0, 0.15));
+		cylinderVisual->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
 	} else {
 		UE_LOG(LogTemp, Error, TEXT("Failed loading Mesh for Rest Actor root mesh component!"));
 	}

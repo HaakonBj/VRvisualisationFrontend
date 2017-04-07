@@ -68,7 +68,8 @@ public:
 	void CreateVerticalConnection(FVector position);
 	AConnectionActor * CreateAndReturnVerticalConnection(FVector position);
 	void ScaleVerticalConnections(int scaleToIndex);
-	void SpawnHorizontalBranchConnection(FVector parentPosition);
+	//void SpawnHorizontalBranchConnection(FVector parentPosition);
+	void SpawnHorizontalBranchConnection(int currentIndex);
 	//void SpawnHorizontalBranchConnection(int currentIndex);
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	void SetFloorActorReference(AStaticMeshActor* floorMesh);

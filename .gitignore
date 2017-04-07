@@ -73,6 +73,7 @@ Content/Geometry/Meshes/*
 !Content/Geometry/Meshes/Keys_Key1.uasset
 !Content/Geometry/Meshes/Lever_Body.uasset
 !Content/Geometry/Meshes/Lever_Handle.uasset
+!Content/Geometry/Meshes/CylinderFix.uasset
 
 !Content/StarterContent
 Content/StarterContent/*
