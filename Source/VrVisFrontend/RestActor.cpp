@@ -132,8 +132,8 @@ void ARestActor::SetRotationAmount() {
 
 FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
 	this->indexesToParentListToRemove.Empty();
-	//float numberOfTracksBetween;
-	//float stepDegree;
+	/*float numberOfTracksBetween;
+	float stepDegree;*/
 	int index = 0;
 
 	//Case where current has 2 parents and next has 1
@@ -160,14 +160,14 @@ FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
 			index = this->UnclaimedParentList.Add(next);
 		}
 		//is this check not the same as hasParent? Can I just use hasParent?
-		/*if (this->UnclaimedParentList.Find(current, this->indexToBeReplaced)) {
-			numberOfTracksBetween = index - this->indexToBeReplaced;
+		if (this->UnclaimedParentList.Find(current, this->indexToBeReplaced)) {
+		/*	numberOfTracksBetween = index - this->indexToBeReplaced;
 			stepDegree = this->quarterRotation / numberOfTracksBetween;
 			AConnectionActor* conActor = this->CreateConnectionActor(current->GetActorLocation(), numberOfTracksBetween, this->baseRotationForMergeConnection + stepDegree);
-			this->ConnectionArray.Add(conActor);
+			this->ConnectionArray.Add(conActor);*/
 		} else {
 			UE_LOG(LogTemp, Warning, TEXT("Could not find commit %s"), *current->GetSha());
-		}*/
+		}
 	} else {
 		this->UpdatePosition(current, next);
 	}
@@ -180,10 +180,10 @@ FVector ARestActor::FindPosition(ACommitActor* current, ACommitActor* next) {
 //Handles the position update for most parent cases when positioning.
 //See RestActor::FindPosition for the only case that does not work with this
 void ARestActor::UpdatePosition(ACommitActor* current, ACommitActor* next) {
-	/*int numberOfTracksBetween;
-	float stepDegree;
-	AConnectionActor* conActor;
-*/
+	//int numberOfTracksBetween;
+	//float stepDegree;
+	//AConnectionActor* conActor;
+
 	for (int i = 0; i < this->UnclaimedParentList.Num(); i++) {
 		if (next->GetSha() == this->UnclaimedParentList[i]->GetParentOne()) {
 			this->indexesToParentListToRemove.Add(i);
@@ -204,13 +204,14 @@ void ARestActor::UpdatePosition(ACommitActor* current, ACommitActor* next) {
 		}
 		this->UnclaimedParentList[this->indexToBeReplaced] = next;
 		//Create certain merge connections for cases where current and next has 2 parents and next has branches from it
-		/*int index;
+		int index;
 		if (this->UnclaimedParentList.Find(current, index) && current->GetParentTwo() == next->GetSha()) {
-			numberOfTracksBetween = this->indexToBeReplaced - index;
-			stepDegree = this->quarterRotation / numberOfTracksBetween;
-			conActor = this->CreateConnectionActor(current->GetActorLocation(), numberOfTracksBetween, this->baseRotationForMergeConnection + stepDegree);
-			this->ConnectionArray.Add(conActor);
-		}*/
+			//numberOfTracksBetween = this->indexToBeReplaced - index;
+			//stepDegree = this->quarterRotation / numberOfTracksBetween;
+			//conActor = this->CreateConnectionActor(current->GetActorLocation(), numberOfTracksBetween, this->baseRotationForMergeConnection + stepDegree);
+			//this->ConnectionArray.Add(conActor);
+			this->SpawnSpecialMergeConnection(current->GetActorLocation());
+		}
 	} else {
 		float angle = this->UnclaimedParentList.Num() * this->rotationAmount;
 		float radian = UKismetMathLibrary::DegreesToRadians(angle);
@@ -297,10 +298,10 @@ AConnectionActor * ARestActor::CreateConnectionActor(FVector conPosition, int zS
 	AConnectionActor* conActor = this->GetWorld()->SpawnActor<AConnectionActor>();
 	conActor->SetActorLocation(conPosition);
 	conActor->setHorizontal();
-	FRotator rotator = conActor->GetActorRotation();
-	rotator.Roll += degreesToRotate;
-	conActor->SetActorRotation(rotator);
-	conActor->SetActorScale3D(FVector(1, 1, zScale));
+//	FRotator rotator = conActor->GetActorRotation();
+//	rotator.Roll += degreesToRotate;
+//	conActor->SetActorRotation(rotator);
+//	conActor->SetActorScale3D(FVector(1, 1, zScale));
 //	this->CheckIfToSetActorHidden(conActor);
 	return conActor;
 }
@@ -376,6 +377,20 @@ void ARestActor::SpawnHorizontalBranchConnection(int currentIndex) {
 	conPosition.Z -= this->spaceIncrease/* / 2*/;
 	//	this->CheckIfToSetActorHidden(conActor);
 	FVector vectorBetween = commitPosition - conPosition;
+	float distanceBetween = vectorBetween.Size();
+	FRotator rotator = UKismetMathLibrary::MakeRotFromZ(vectorBetween);
+	conActor->SetActorLocation(conPosition);
+	conActor->SetActorRotation(rotator);
+	conActor->SetActorScale3D(FVector(1, 1, distanceBetween));
+	this->ConnectionArray.Add(conActor);
+}
+
+void ARestActor::SpawnSpecialMergeConnection(FVector currentPosition) {
+	AConnectionActor* conActor = this->GetWorld()->SpawnActor<AConnectionActor>();
+	FVector conPosition = this->newPosition;
+	conPosition.Z -= this->spaceIncrease/* / 2*/;
+	//	this->CheckIfToSetActorHidden(conActor);
+	FVector vectorBetween = currentPosition - conPosition;
 	float distanceBetween = vectorBetween.Size();
 	FRotator rotator = UKismetMathLibrary::MakeRotFromZ(vectorBetween);
 	conActor->SetActorLocation(conPosition);

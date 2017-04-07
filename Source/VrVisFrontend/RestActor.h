@@ -71,6 +71,7 @@ public:
 	//void SpawnHorizontalBranchConnection(FVector parentPosition);
 	void SpawnHorizontalBranchConnection(int currentIndex);
 	//void SpawnHorizontalBranchConnection(int currentIndex);
+	void SpawnSpecialMergeConnection(FVector currentPosition);
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	void SetFloorActorReference(AStaticMeshActor* floorMesh);
 	UFUNCTION(BlueprintCallable, Category = "Rest")
