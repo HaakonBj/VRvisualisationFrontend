@@ -20,7 +20,7 @@ ARestActor::ARestActor() {
 	//this->DisableComponentsSimulatePhysics(); //possibly use actor->GetRootComponent()->SetSimulatePhysics( false ); in component
 	this->coneVisual->SetMobility(EComponentMobility::Movable);
 	this->RootComponent->SetMobility(EComponentMobility::Movable);
-	this->newPosition = { 0, 0, 200 };
+	this->newPosition = { 60, 0, 200 };
 	this->lastUsedConnectionIndex = 0;
 	this->UnclaimedConnectionList.Reserve(2500);
 	this->UnclaimedParentList.Reserve(2500);
@@ -243,7 +243,7 @@ void ARestActor::UpdateConnections(ACommitActor* current, ACommitActor* next) {
 		this->lastUsedConnectionIndex++;
 	} else if (this->lastUsedConnectionIndex > this->UnclaimedParentList.Num() - 1) {
 		//Commit was removed from tracklist
-		for (int i = 0; i > this->indexesToParentListToRemove.Num(); i--) {
+		for (int i = this->indexesToParentListToRemove.Num() - 1; i > 0; i--) {
 			this->UnclaimedConnectionList.RemoveAt(this->indexesToParentListToRemove[i]);
 		}
 		
@@ -323,9 +323,9 @@ void ARestActor::CreateVerticalConnection(FVector position) {
 	FRotator rotator = conActor->GetActorRotation();
 	rotator.Roll += this->baseRotationForVerticalConnection;
 	conActor->SetActorRotation(rotator);
-	FVector scale = conActor->GetActorScale();
+	/*FVector scale = conActor->GetActorScale();
 	scale.Z = scale.Z;
-	conActor->SetActorScale3D(scale);
+	conActor->SetActorScale3D(scale);*/
 //	this->CheckIfToSetActorHidden(conActor);
 	this->UnclaimedConnectionList.Add(conActor);
 	this->ConnectionArray.Add(conActor);
@@ -337,9 +337,9 @@ AConnectionActor* ARestActor::CreateAndReturnVerticalConnection(FVector position
 	FRotator rotator = conActor->GetActorRotation();
 	rotator.Roll += this->baseRotationForVerticalConnection;
 	conActor->SetActorRotation(rotator);
-	FVector scale = conActor->GetActorScale();
+	/*FVector scale = conActor->GetActorScale();
 	scale.Z = scale.Z / 2.0f;
-	conActor->SetActorScale3D(scale);
+	conActor->SetActorScale3D(scale);*/
 //	this->CheckIfToSetActorHidden(conActor);
 	return conActor;
 }
@@ -349,13 +349,13 @@ void ARestActor::ScaleVerticalConnections(int scaleToIndex) {
 	if (scaleToIndex != 0) {
 		for (int i = 0; i < scaleToIndex; i++) {
 			scale = this->UnclaimedConnectionList[i]->GetActorScale();
-			scale.Z += 1;
+			scale.Z += this->spaceIncrease;
 			this->UnclaimedConnectionList[i]->SetActorScale3D(scale);
 		}
 	} else {
 		for (auto * connection : this->UnclaimedConnectionList) {
 			scale = connection->GetActorScale();
-			scale.Z += 1;
+			scale.Z += this->spaceIncrease;
 			connection->SetActorScale3D(scale);
 		}
 	}
