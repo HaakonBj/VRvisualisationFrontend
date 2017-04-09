@@ -34,6 +34,7 @@ public:
 	TArray<AConnectionActor*> UnclaimedConnectionList;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	TArray<int> indexesToParentListToRemove;
+	TArray<int> newlyCreatedConnectionIndexes;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	FVector newPosition;
 	const int spaceIncrease = 60;
@@ -62,16 +63,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	FVector FindPosition(ACommitActor* current, ACommitActor* next);
 	void UpdatePosition(ACommitActor* current, ACommitActor* next);
-	void UpdateConnections(ACommitActor* current, ACommitActor* next);
 	AConnectionActor * CreateConnectionActor(FVector conPosition, int zScale, float degreesToRotate);
-	UFUNCTION(BlueprintCallable, Category = "Rest")
-	void CreateVerticalConnection(FVector position);
-	AConnectionActor * CreateAndReturnVerticalConnection(FVector position);
-	void ScaleVerticalConnections(int scaleToIndex);
-	//void SpawnHorizontalBranchConnection(FVector parentPosition);
-	void SpawnHorizontalBranchConnection(int currentIndex);
-	//void SpawnHorizontalBranchConnection(int currentIndex);
-	void SpawnSpecialMergeConnection(FVector currentPosition);
+	AConnectionActor * CreateAndReturnVerticalConnection();
+	void ScaleVerticalConnections();
+	void SpawnBranchConnection(int currentIndex);
+	void SpawnMergeConnection(FVector currentPosition);
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	void SetFloorActorReference(AStaticMeshActor* floorMesh);
 	UFUNCTION(BlueprintCallable, Category = "Rest")
