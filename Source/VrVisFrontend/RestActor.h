@@ -44,6 +44,7 @@ public:
 	const float quarterRotation = 22.5f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	float rotationAmount;
+	float modifiedHeightFromFloor;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Rest")
 	int maxAmountOfTracksCounter = 0;
 	int currentTrackCounter = 0;
@@ -70,6 +71,7 @@ public:
 	void SpawnMergeConnection(FVector currentPosition);
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	void SetFloorActorReference(AStaticMeshActor* floorMesh);
+	void SetCompareValueForFloor();
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	void CheckIfToSetActorHidden(AActor * actorToBeHidden);
 	~ARestActor();

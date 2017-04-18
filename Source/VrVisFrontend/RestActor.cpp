@@ -279,7 +279,7 @@ AConnectionActor* ARestActor::CreateAndReturnVerticalConnection() {
 	FVector scale = conActor->GetActorScale();
 	scale.Z += this->spaceIncrease ;
 	conActor->SetActorScale3D(scale);
-//	this->CheckIfToSetActorHidden(conActor);
+	this->CheckIfToSetActorHidden(conActor);
 	this->ConnectionArray.Add(conActor);
 	return conActor;
 }
@@ -306,7 +306,7 @@ void ARestActor::SpawnBranchConnection(int currentIndex) {
 	commitPosition.Z = this->newPosition.Z - this->spaceIncrease/2;
 	FVector conPosition = this->newPosition;
 	conPosition.Z -= this->spaceIncrease;
-	//	this->CheckIfToSetActorHidden(conActor);
+		this->CheckIfToSetActorHidden(conActor);
 	FVector vectorBetween = commitPosition - conPosition;
 	float distanceBetween = vectorBetween.Size();
 	FRotator rotator = UKismetMathLibrary::MakeRotFromZ(vectorBetween);
@@ -320,7 +320,7 @@ void ARestActor::SpawnMergeConnection(FVector currentPosition) {
 	AConnectionActor* conActor = this->GetWorld()->SpawnActor<AConnectionActor>();
 	FVector conPosition = this->newPosition;
 	conPosition.Z -= this->spaceIncrease / 2;
-	//	this->CheckIfToSetActorHidden(conActor);
+		this->CheckIfToSetActorHidden(conActor);
 	FVector vectorBetween = currentPosition - conPosition;
 	float distanceBetween = vectorBetween.Size();
 	FRotator rotator = UKismetMathLibrary::MakeRotFromZ(vectorBetween);
@@ -332,11 +332,16 @@ void ARestActor::SpawnMergeConnection(FVector currentPosition) {
 
 void ARestActor::SetFloorActorReference(AStaticMeshActor* floorMesh) {
 	this->floor = floorMesh;
+	this->SetCompareValueForFloor();
+}
+
+void ARestActor::SetCompareValueForFloor() {
+	this->modifiedHeightFromFloor = this->floor->GetActorLocation().Z - this->spaceIncrease;
 }
 
 void ARestActor::CheckIfToSetActorHidden(AActor * actorToBeHidden) {
 	bool hidden;
-	if (actorToBeHidden->GetActorLocation().Z < this->floor->GetActorLocation().Z) {
+	if (actorToBeHidden->GetActorLocation().Z < modifiedHeightFromFloor) {
 		hidden = true;
 	} else {
 		hidden = false;
