@@ -219,7 +219,7 @@ void ARestActor::UpdatePosition(ACommitActor* current, ACommitActor* next) {
 		//Replacing commit in existing track, should not require changes to connections:
 		this->UnclaimedParentList[this->indexToBeReplaced] = next;
 		//Create certain merge connections for cases where current and next has 2 parents and next has branches from it
-		int index;
+		//int index;
 		if (this->UnclaimedParentList.Find(current, index) && current->GetParentTwo() == next->GetSha()) {
 			this->SpawnMergeConnection(current->GetActorLocation());
 		}
@@ -280,6 +280,7 @@ AConnectionActor* ARestActor::CreateAndReturnVerticalConnection() {
 	scale.Z += this->spaceIncrease ;
 	conActor->SetActorScale3D(scale);
 //	this->CheckIfToSetActorHidden(conActor);
+	this->ConnectionArray.Add(conActor);
 	return conActor;
 }
 
