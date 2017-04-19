@@ -264,6 +264,7 @@ AConnectionActor * ARestActor::CreateConnectionActor(FVector conPosition, int zS
 	AConnectionActor* conActor = this->GetWorld()->SpawnActor<AConnectionActor>();
 	conActor->SetActorLocation(conPosition);
 	conActor->setHorizontal();
+	this->CheckIfToSetActorHidden(conActor);
 	return conActor;
 }
 
@@ -313,6 +314,7 @@ void ARestActor::SpawnBranchConnection(int currentIndex) {
 	conActor->SetActorLocation(conPosition);
 	conActor->SetActorRotation(rotator);
 	conActor->SetActorScale3D(FVector(1, 1, distanceBetween));
+	this->CheckIfToSetActorHidden(conActor);
 	this->ConnectionArray.Add(conActor);
 }
 
@@ -327,6 +329,7 @@ void ARestActor::SpawnMergeConnection(FVector currentPosition) {
 	conActor->SetActorLocation(conPosition);
 	conActor->SetActorRotation(rotator);
 	conActor->SetActorScale3D(FVector(1, 1, distanceBetween));
+	this->CheckIfToSetActorHidden(conActor);
 	this->ConnectionArray.Add(conActor);
 }
 
