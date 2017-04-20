@@ -264,7 +264,7 @@ AConnectionActor * ARestActor::CreateConnectionActor(FVector conPosition, int zS
 	AConnectionActor* conActor = this->GetWorld()->SpawnActor<AConnectionActor>();
 	conActor->SetActorLocation(conPosition);
 	conActor->setHorizontal();
-	this->CheckIfToSetActorHidden(conActor);
+//	this->CheckIfToSetActorHidden(conActor);
 	return conActor;
 }
 
@@ -280,7 +280,7 @@ AConnectionActor* ARestActor::CreateAndReturnVerticalConnection() {
 	FVector scale = conActor->GetActorScale();
 	scale.Z += this->spaceIncrease ;
 	conActor->SetActorScale3D(scale);
-	this->CheckIfToSetActorHidden(conActor);
+//	this->CheckIfToSetActorHidden(conActor);
 	this->ConnectionArray.Add(conActor);
 	return conActor;
 }
@@ -307,14 +307,13 @@ void ARestActor::SpawnBranchConnection(int currentIndex) {
 	commitPosition.Z = this->newPosition.Z - this->spaceIncrease/2;
 	FVector conPosition = this->newPosition;
 	conPosition.Z -= this->spaceIncrease;
-		this->CheckIfToSetActorHidden(conActor);
 	FVector vectorBetween = commitPosition - conPosition;
 	float distanceBetween = vectorBetween.Size();
 	FRotator rotator = UKismetMathLibrary::MakeRotFromZ(vectorBetween);
 	conActor->SetActorLocation(conPosition);
 	conActor->SetActorRotation(rotator);
 	conActor->SetActorScale3D(FVector(1, 1, distanceBetween));
-	this->CheckIfToSetActorHidden(conActor);
+//	this->CheckIfToSetActorHidden(conActor);
 	this->ConnectionArray.Add(conActor);
 }
 
@@ -322,14 +321,13 @@ void ARestActor::SpawnMergeConnection(FVector currentPosition) {
 	AConnectionActor* conActor = this->GetWorld()->SpawnActor<AConnectionActor>();
 	FVector conPosition = this->newPosition;
 	conPosition.Z -= this->spaceIncrease / 2;
-		this->CheckIfToSetActorHidden(conActor);
 	FVector vectorBetween = currentPosition - conPosition;
 	float distanceBetween = vectorBetween.Size();
 	FRotator rotator = UKismetMathLibrary::MakeRotFromZ(vectorBetween);
 	conActor->SetActorLocation(conPosition);
 	conActor->SetActorRotation(rotator);
 	conActor->SetActorScale3D(FVector(1, 1, distanceBetween));
-	this->CheckIfToSetActorHidden(conActor);
+	//this->CheckIfToSetActorHidden(conActor);
 	this->ConnectionArray.Add(conActor);
 }
 
