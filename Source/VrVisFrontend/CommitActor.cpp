@@ -35,6 +35,10 @@ void ACommitActor::Init(FArr data) {
 	this->parentTwo = data.arr[5];
 }
 
+UStaticMeshComponent * ACommitActor::GetMesh() {
+	return this->sphereVisual;
+}
+
 void ACommitActor::BeginPlay() {
 	Super::BeginPlay();
 }

@@ -19,6 +19,8 @@ public:
 	ACommitActor();
 	UFUNCTION(BlueprintCallable, Category = "Rest")
 	void Init(FArr data);
+	UFUNCTION(BlueprintCallable, Category = "Rest")
+	UStaticMeshComponent* GetMesh();
 	virtual void BeginPlay() override;
 	virtual void Tick( float DeltaSeconds) override;
 	UFUNCTION(BlueprintPure, Category = "Rest")
