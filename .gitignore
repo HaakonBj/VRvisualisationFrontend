@@ -62,18 +62,24 @@ Saved/Config/*
 Saved/Config/Windows/*
 !Saved/Config/Windows/Engine.ini
 
+!Content/
 Content/*
 !Content/Blueprints
 !Content/Geometry/
 Content/Geometry/*
 !Content/Geometry/Meshes
 Content/Geometry/Meshes/*
-!Content/Geometry/Meshes/level_0_fbm
-!Content/Geometry/Meshes/level_0_fbm/*
+!Content/Geometry/Meshes/level_0_fbm/
 !Content/Geometry/Meshes/Keys_Key1.uasset
 !Content/Geometry/Meshes/Lever_Body.uasset
 !Content/Geometry/Meshes/Lever_Handle.uasset
 !Content/Geometry/Meshes/CylinderFix.uasset
+!Content/Geometry/Meshes/Arrow.uasset
+!Content/Geometry/Meshes/Calendar.uasset
+!Content/Geometry/Meshes/middle_aged_male_head-fbx_male_head.uasset
+!Content/Geometry/Meshes/middle_aged_male_head-fbx.uasset
+!Content/Geometry/Meshes/Material_001.uasset
+
 
 !Content/StarterContent
 Content/StarterContent/*
